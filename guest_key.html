@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest Digital Key – Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="gv-header">
+    <h1>Guest Digital Key</h1>
+  </header>
+
+  <main class="form-container">
+    <form id="keyForm">
+      <input type="text" id="guestName" placeholder="Full Name" required />
+      <input type="text" id="guestPasscode" placeholder="Passcode" required />
+      <button type="submit">Retrieve Key</button>
+    </form>
+    <div id="keyResult"></div>
+  </main>
+
+  <script>
+    const form = document.getElementById('keyForm');
+    const result = document.getElementById('keyResult');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = guestName.value.trim();
+      const pass = guestPasscode.value.trim();
+      const guests = JSON.parse(localStorage.getItem('guests') || '[]');
+      const found = guests.find(g => g.name === name && g.passcode === pass);
+
+      if (found) {
+        result.innerHTML = `
+          <p>Welcome, <strong>${found.name}</strong>!</p>
+          <p>Your assigned room: <strong>${found.room}</strong></p>
+          <p>Your digital key: <strong>${found.key}</strong></p>
+        `;
+      } else {
+        result.innerHTML = `<p class="error">No matching guest found. Please check your name and passcode.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
