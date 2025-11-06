@@ -7,17 +7,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- ===== Header ===== -->
   <header class="gv-header">
-    <h1>Welcome to Grand Vista Hotel</h1>
+    <img src="V.png" alt="Grand Vista Hotel Logo" style="height:120px; margin-bottom:1rem;">
+    <h1>Grand Vista Hotel</h1>
     <p>Luxury, Comfort, and Modern Hospitality</p>
   </header>
 
+  <!-- ===== Main Content ===== -->
   <main>
     <!-- ===== Guest Section ===== -->
     <section class="home-links">
       <h2>Guest Services</h2>
       <ul>
-        <li><a href="guest_information.html">Guest Information</a></li>
+        <li><a href="guest_information.html">Guest Check-In</a></li>
         <li><a href="guest_dashboard.html">Guest Dashboard</a></li>
       </ul>
     </section>
@@ -45,12 +48,14 @@
     </section>
   </main>
 
-  <footer style="text-align:center; padding:1rem; color:#888;">
+  <!-- ===== Footer ===== -->
+  <footer>
     <p>&copy; 2025 Grand Vista Hotel | Internal Demonstration Only</p>
   </footer>
 
+  <!-- ===== Script ===== -->
   <script>
-    // Project Management Login logic
+    // Project Management Login
     const form = document.getElementById('teamLoginForm');
     const errorMsg = document.getElementById('teamError');
 
