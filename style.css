@@ -1,5 +1,5 @@
 /* =======================================
-   Grand Vista Hotel - Global Stylesheet
+   Grand Vista Hotel - Unified Stylesheet
    ======================================= */
 
 :root {
@@ -44,13 +44,12 @@ a:hover {
   padding: 1.5rem 1rem;
 }
 
-.gv-logo {
-  height: 60px;
-  display: block;
-  margin: 0 auto 0.5rem;
+.gv-header p {
+  color: var(--muted);
+  margin-top: 0.5rem;
 }
 
-/* ---------- HOME LINKS ---------- */
+/* ---------- HOME PAGE ---------- */
 .home-links {
   text-align: center;
   padding: 2rem;
@@ -75,7 +74,7 @@ a:hover {
   color: #fff3c0;
 }
 
-/* ---------- FORMS & CONTAINERS ---------- */
+/* ---------- FORM CONTAINERS ---------- */
 .form-container {
   max-width: 380px;
   background-color: var(--card-bg);
@@ -155,6 +154,11 @@ button:hover {
   border: 1px solid var(--accent);
   border-radius: 6px;
   text-align: left;
+  transition: transform 0.2s;
+}
+
+.guest-card:hover {
+  transform: scale(1.02);
 }
 
 .guest-card h3 {
@@ -176,4 +180,96 @@ button:hover {
   margin-bottom: 0.4rem;
 }
 
-/* ---------- KANBAN BOARD (EMPLOYEE VIEW) -----*
+/* ---------- KANBAN BOARD ---------- */
+.kanban-board {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 2rem;
+  overflow-x: auto;
+}
+
+.kanban-column {
+  flex: 1;
+  min-width: 300px;
+  background-color: var(--card-bg);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem;
+  height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+.kanban-column h2 {
+  text-align: center;
+  color: var(--accent);
+  margin-top: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--accent);
+}
+
+.kanban-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* ---------- BUTTONS ---------- */
+.guest-card button,
+button.danger {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.guest-card button {
+  background-color: var(--accent);
+  color: var(--primary);
+}
+
+.guest-card button:hover {
+  background-color: #c0a060;
+}
+
+button.danger {
+  background-color: #b22222;
+  color: #fff;
+}
+
+button.danger:hover {
+  background-color: #ff4444;
+}
+
+/* ---------- CENTERED FOOTER/BUTTONS ---------- */
+.center-btn {
+  text-align: center;
+  margin: 2rem;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+  .kanban-board {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .kanban-column {
+    width: 90%;
+    height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-container {
+    width: 90%;
+    padding: 1.2rem;
+  }
+}
