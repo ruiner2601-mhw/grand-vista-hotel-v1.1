@@ -9,27 +9,30 @@
 <body>
   <header class="gv-header">
     <h1>Welcome to Grand Vista Hotel</h1>
+    <p>Luxury, Comfort, and Modern Hospitality</p>
   </header>
 
   <main>
+    <!-- ===== Guest Section ===== -->
     <section class="home-links">
       <h2>Guest Services</h2>
       <ul>
         <li><a href="guest_information.html">Guest Information</a></li>
         <li><a href="guest_dashboard.html">Guest Dashboard</a></li>
       </ul>
+    </section>
 
+    <!-- ===== Employee Section ===== -->
+    <section class="home-links">
       <h2>Employee Access</h2>
       <ul>
         <li><a href="employee_login.html">Employee Login</a></li>
-        <li><a href="employee_guest_view.html">Guest Records</a></li>
+        <li><a href="employee_guest_view.html">Guest Records Board</a></li>
       </ul>
     </section>
 
-    <hr>
-
-    <!-- Team Login Section -->
-    <section class="form-container">
+    <!-- ===== Team Login Section ===== -->
+    <section class="form-container" style="margin-top: 3rem;">
       <h2>Project Management Login</h2>
       <form id="teamLoginForm">
         <input type="text" id="teamUsername" placeholder="Username" required />
@@ -37,6 +40,9 @@
         <button type="submit">Login</button>
       </form>
       <p id="teamError" class="error"></p>
+      <p class="muted" style="margin-top:0.5rem;">
+        (Restricted access – for internal team only)
+      </p>
     </section>
   </main>
 
@@ -45,7 +51,7 @@
   </footer>
 
   <script>
-    // Team login logic
+    // Project Management Login logic
     const form = document.getElementById('teamLoginForm');
     const errorMsg = document.getElementById('teamError');
 
