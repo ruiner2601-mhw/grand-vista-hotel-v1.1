@@ -1,28 +1,28 @@
 /* =======================================
-   Grand Vista Hotel - Unified Stylesheet
+   Grand Vista Hotel - White & Gold Theme
    ======================================= */
 
 :root {
-  --primary: #000;
-  --secondary: #fff;
-  --accent: #d4af37; /* elegant gold */
-  --background: #111;
-  --card-bg: #1a1a1a;
-  --muted: #aaa;
-  --error: #ff5555;
+  --primary: #fff;
+  --secondary: #000;
+  --accent: #d4af37; /* gold */
+  --background: #f8f8f8;
+  --card-bg: #ffffff;
+  --muted: #555;
+  --error: #b00020;
 }
 
 /* ---------- GLOBAL ---------- */
 body {
   margin: 0;
   font-family: "Georgia", serif;
-  background-color: var(--primary);
+  background-color: var(--background);
   color: var(--secondary);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 h1, h2, h3, h4 {
-  color: var(--accent);
+  color: var(--secondary);
   text-align: center;
   margin-top: 0;
 }
@@ -30,6 +30,7 @@ h1, h2, h3, h4 {
 a {
   color: var(--accent);
   text-decoration: none;
+  font-weight: 500;
 }
 
 a:hover {
@@ -38,18 +39,25 @@ a:hover {
 
 /* ---------- HEADER ---------- */
 .gv-header {
-  background-color: var(--background);
-  border-bottom: 2px solid var(--accent);
+  background-color: var(--primary);
+  border-bottom: 3px solid var(--accent);
   text-align: center;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
+}
+
+.gv-header h1 {
+  font-family: "Playfair Display", serif;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 
 .gv-header p {
   color: var(--muted);
   margin-top: 0.5rem;
+  font-style: italic;
 }
 
-/* ---------- HOME PAGE ---------- */
+/* ---------- HOME LINKS ---------- */
 .home-links {
   text-align: center;
   padding: 2rem;
@@ -66,35 +74,37 @@ a:hover {
 
 .home-links a {
   font-size: 1.2rem;
-  color: var(--accent);
-  transition: color 0.3s;
+  color: var(--secondary);
+  border-bottom: 2px solid transparent;
+  transition: color 0.3s, border-color 0.3s;
 }
 
 .home-links a:hover {
-  color: #fff3c0;
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
-/* ---------- FORM CONTAINERS ---------- */
+/* ---------- FORM CONTAINER ---------- */
 .form-container {
-  max-width: 380px;
+  max-width: 420px;
   background-color: var(--card-bg);
   border: 2px solid var(--accent);
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 2rem auto;
   padding: 2rem;
   text-align: center;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
 }
 
 input, button, textarea, select {
   width: 100%;
-  padding: 0.7rem;
+  padding: 0.8rem;
   margin: 0.6rem 0;
   font-size: 1rem;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid var(--accent);
-  background-color: var(--secondary);
-  color: var(--primary);
+  background-color: var(--primary);
+  color: var(--secondary);
   font-family: inherit;
 }
 
@@ -109,11 +119,12 @@ button {
   font-weight: bold;
   cursor: pointer;
   border: none;
+  border-radius: 6px;
   transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background-color: #c0a060;
+  background-color: #e5c864;
   transform: translateY(-1px);
 }
 
@@ -124,152 +135,4 @@ button:hover {
 
 .muted {
   color: var(--muted);
-  font-style: italic;
-}
-
-/* ---------- DASHBOARD ---------- */
-#dashboard {
-  text-align: left;
-}
-
-#dashboard h2 {
-  text-align: center;
-}
-
-#dashboard p {
-  margin: 0.4rem 0;
-}
-
-#dashboard hr {
-  margin: 1.5rem 0;
-  border: 0;
-  border-top: 1px solid var(--accent);
-}
-
-/* ---------- GUEST CARDS ---------- */
-.guest-card {
-  background-color: var(--card-bg);
-  padding: 1rem 1.5rem;
-  margin: 1rem 0;
-  border: 1px solid var(--accent);
-  border-radius: 6px;
-  text-align: left;
-  transition: transform 0.2s;
-}
-
-.guest-card:hover {
-  transform: scale(1.02);
-}
-
-.guest-card h3 {
-  color: var(--accent);
-  margin-bottom: 0.3rem;
-}
-
-.guest-card p {
-  margin: 0.2rem 0;
-}
-
-.guest-card ul {
-  padding-left: 1.2rem;
-  margin: 0.5rem 0;
-}
-
-.guest-card li {
-  color: var(--secondary);
-  margin-bottom: 0.4rem;
-}
-
-/* ---------- KANBAN BOARD ---------- */
-.kanban-board {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  gap: 1.5rem;
-  padding: 2rem;
-  overflow-x: auto;
-}
-
-.kanban-column {
-  flex: 1;
-  min-width: 300px;
-  background-color: var(--card-bg);
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  padding: 1rem;
-  height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
-}
-
-.kanban-column h2 {
-  text-align: center;
-  color: var(--accent);
-  margin-top: 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--accent);
-}
-
-.kanban-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-/* ---------- BUTTONS ---------- */
-.guest-card button,
-button.danger {
-  margin-top: 1rem;
-  width: 100%;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.guest-card button {
-  background-color: var(--accent);
-  color: var(--primary);
-}
-
-.guest-card button:hover {
-  background-color: #c0a060;
-}
-
-button.danger {
-  background-color: #b22222;
-  color: #fff;
-}
-
-button.danger:hover {
-  background-color: #ff4444;
-}
-
-/* ---------- CENTERED FOOTER/BUTTONS ---------- */
-.center-btn {
-  text-align: center;
-  margin: 2rem;
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 900px) {
-  .kanban-board {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .kanban-column {
-    width: 90%;
-    height: auto;
-  }
-}
-
-@media (max-width: 600px) {
-  .form-container {
-    width: 90%;
-    padding: 1.2rem;
-  }
-}
+  f
