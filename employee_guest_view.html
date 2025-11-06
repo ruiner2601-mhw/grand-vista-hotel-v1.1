@@ -6,7 +6,7 @@
   <title>Employee Guest Management | Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Table-specific styling */
+    /* --- Table Styling --- */
     table {
       width: 95%;
       margin: 2rem auto;
@@ -57,6 +57,16 @@
       background-color: #e5c864;
     }
 
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #d4af37;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
+    }
+
     h2 {
       text-align: center;
       margin-top: 1.5rem;
@@ -67,7 +77,7 @@
   <header class="gv-header">
     <img src="V.png" alt="Grand Vista Hotel Logo" style="height:100px; margin-bottom:1rem;">
     <h1>Guest Management Board</h1>
-    <p>View guest details, room assignments, and service requests</p>
+    <p>View guest details, requests, and stay information</p>
   </header>
 
   <main>
@@ -79,7 +89,8 @@
           <th>Room</th>
           <th>Arrival</th>
           <th>Departure</th>
-          <th>Key</th>
+          <th>Requests</th>
+          <th>Key Status</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -92,42 +103,48 @@
   </footer>
 
   <script>
-    // Generate random date between today and +7 days
+    // Generate random departure date within 7 days
     function randomDepartureDate() {
       const today = new Date();
       const offset = Math.floor(Math.random() * 7) + 1;
-      const departure = new Date(today);
-      departure.setDate(today.getDate() + offset);
-      return departure.toISOString().split('T')[0];
+      const dep = new Date(today);
+      dep.setDate(today.getDate() + offset);
+      return dep.toISOString().split("T")[0];
     }
 
-    // Load guest data
+    // Load and enrich guests data
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
-
-    // If guests have no date fields, add them
     guests = guests.map(g => {
       if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
       if (!g.departureDate) g.departureDate = randomDepartureDate();
       if (!g.keyStatus) g.keyStatus = "Active";
       if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
       if (!g.billing) g.billing = "Paid in Full";
+      if (!g.requests) g.requests = [];
       return g;
     });
-
     localStorage.setItem("guests", JSON.stringify(guests));
 
     const tableBody = document.getElementById("guestTableBody");
 
+    // Helper: Mask string for display
+    function maskString(str) {
+      if (!str) return "N/A";
+      return "****" + str.slice(-3);
+    }
+
     function renderGuests() {
       tableBody.innerHTML = "";
-
       guests.forEach((guest, index) => {
+        const requestCount = guest.requests ? guest.requests.length : 0;
+
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${guest.name}</td>
           <td>${guest.room}</td>
           <td>${guest.arrivalDate}</td>
           <td>${guest.departureDate}</td>
+          <td>${requestCount}</td>
           <td>${guest.keyStatus}</td>
           <td><button class="view-btn" onclick="toggleDetails(${index})">View Details</button></td>
         `;
@@ -135,12 +152,18 @@
         const detailRow = document.createElement("tr");
         detailRow.className = "details";
         detailRow.innerHTML = `
-          <td colspan="6">
+          <td colspan="7">
+            <strong>Passcode:</strong> 
+            <span id="pass-${index}" class="masked">${maskString(guest.passcode)}</span>
+            <button class="toggle-btn" onclick="toggleMask(${index}, 'pass')">Show</button><br><br>
+            
+            <strong>Digital Key:</strong> 
+            <span id="key-${index}" class="masked">${maskString(guest.key)}</span>
+            <button class="toggle-btn" onclick="toggleMask(${index}, 'key')">Show</button><br><br>
+
             <strong>Service Requests:</strong>
             <ul>
-              ${guest.requests && guest.requests.length > 0
-                ? guest.requests.map(r => `<li>${r}</li>`).join("")
-                : "<li>No pending requests</li>"}
+              ${guest.requests.length > 0 ? guest.requests.map(r => `<li>${r}</li>`).join("") : "<li>No pending requests</li>"}
             </ul>
             <strong>Parking Info:</strong> ${guest.parkingInfo}<br>
             <strong>Billing:</strong> ${guest.billing}
@@ -156,6 +179,18 @@
       const detailRows = document.querySelectorAll(".details");
       detailRows[index].style.display =
         detailRows[index].style.display === "table-row" ? "none" : "table-row";
+    }
+
+    function toggleMask(index, type) {
+      const span = document.getElementById(`${type}-${index}`);
+      const guest = guests[index];
+      const isMasked = span.textContent.startsWith("****");
+
+      if (isMasked) {
+        span.textContent = type === "pass" ? guest.passcode : guest.key;
+      } else {
+        span.textContent = maskString(type === "pass" ? guest.passcode : guest.key);
+      }
     }
 
     renderGuests();
