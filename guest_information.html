@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest Check-In | Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="gv-header">
+    <img src="V.png" alt="Grand Vista Hotel Logo" style="height:100px; margin-bottom:1rem;">
+    <h1>Guest Check-In</h1>
+    <p>Welcome to Grand Vista Hotel. Please enter your information to check in.</p>
+  </header>
+
+  <main>
+    <section class="form-container">
+      <form id="checkinForm">
+        <input type="text" id="guestName" placeholder="Full Name" required />
+        <input type="password" id="guestPasscode" placeholder="Passcode (create one)" required />
+        <button type="submit">Check In</button>
+      </form>
+      <p id="errorMsg" class="error"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Grand Vista Hotel</p>
+  </footer>
+
+  <script>
+    // Generate a random 3-digit room number (100-499)
+    function generateRoomNumber() {
+      return Math.floor(Math.random() * 400) + 100;
+    }
+
+    // Generate a random 6-character digital key
+    function generateKey() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let key = "";
+      for (let i = 0; i < 6; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+      return key;
+    }
+
+    document.getElementById("checkinForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("guestName").value.trim();
+      const passcode = document.getElementById("guestPasscode").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (!name || !passcode) {
+        errorMsg.textContent = "Please enter your name and passcode.";
+        return;
+      }
+
+      // Load existing guests
+      let guests = JSON.parse(localStorage.getItem("guests")) || [];
+
+      // Check if guest already exists
+      const existingGuest = guests.find(g => g.name === name && g.passcode === passcode);
+      if (existingGuest) {
+        // Log in existing guest
+        localStorage.setItem("currentGuest", JSON.stringify(existingGuest));
+        window.location.href = "guest_dashboard.html";
+        return;
+      }
+
+      // Create new guest entry
+      const newGuest = {
+        name: name,
+        passcode: passcode,
+        room: generateRoomNumber(),
+        key: generateKey(),
+        guestsInRoom: Math.floor(Math.random() * 4) + 1, // random 1–4 guests
+        requests: []
+      };
+
+      // Save to localStorage
+      guests.push(newGuest);
+      localStorage.setItem("guests", JSON.stringify(guests));
+      localStorage.setItem("currentGuest", JSON.stringify(newGuest));
+
+      // Redirect to dashboard
+      window.location.href = "guest_dashboard.html";
+    });
+  </script>
+</body>
+</html>
