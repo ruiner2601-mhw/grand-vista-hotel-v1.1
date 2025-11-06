@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest Dashboard – Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="gv-header">
+    <h1>Guest Dashboard</h1>
+  </header>
+
+  <main class="form-container" id="dashboard">
+    <h2 id="welcome"></h2>
+    <p><strong>Room:</strong> <span id="room"></span></p>
+    <p><strong>Digital Key:</strong> <span id="key"></span></p>
+
+    <hr>
+
+    <h3>Room Service Request</h3>
+    <form id="serviceForm">
+      <textarea id="serviceText" placeholder="Request (e.g., extra towels, food delivery)" required></textarea>
+      <button type="submit">Submit Request</button>
+    </form>
+
+    <p id="serviceMsg"></p>
+
+    <hr>
+    <button id="logoutBtn">Log Out</button>
+  </main>
+
+  <script>
+    const currentGuest = JSON.parse(localStorage.getItem('currentGuest') || 'null');
+    const dashboard = document.getElementById('dashboard');
+    const serviceForm = document.getElementById('serviceForm');
+    const serviceMsg = document.getElementById('serviceMsg');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (!currentGuest) {
+      // No session → back to homepage
+      window.location.href = 'index.html';
+    } else {
+      document.getElementById('welcome').textContent = `Welcome, ${currentGuest.name}!`;
+      document.getElementById('room').textContent = currentGuest.room;
+      document.getElementById('key').textContent = currentGuest.key;
+    }
+
+    serviceForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = document.getElementById('serviceText').value.trim();
+      if (!text) return;
+
+      const requests = JSON.parse(localStorage.getItem('requests') || '[]');
+      requests.push({
+        guest: currentGuest.name,
+        room: currentGuest.room,
+        request: text,
+        time: new Date().toLocaleString()
+      });
+      localStorage.setItem('requests', JSON.stringify(requests));
+
+      serviceMsg.textContent = 'Request submitted successfully!';
+      serviceForm.reset();
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentGuest');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
