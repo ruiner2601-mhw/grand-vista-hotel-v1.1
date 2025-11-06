@@ -3,71 +3,162 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guest Dashboard – Grand Vista Hotel</title>
+  <title>Guest Dashboard | Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .dashboard-card {
+      max-width: 600px;
+      background-color: #fff;
+      color: #000;
+      margin: 2rem auto;
+      padding: 2rem;
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+    }
+    .dashboard-card h2 {
+      color: #d4af37;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .dashboard-card p {
+      margin: 0.5rem 0;
+    }
+    textarea {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #d4af37;
+      border-radius: 5px;
+      resize: vertical;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul li {
+      background: #fff8dc;
+      border: 1px solid #d4af37;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      margin-top: 0.5rem;
+    }
+  </style>
 </head>
 <body>
   <header class="gv-header">
+    <img src="V.png" alt="Grand Vista Hotel Logo" style="height:100px; margin-bottom:1rem;">
     <h1>Guest Dashboard</h1>
+    <p>Your room details and services</p>
   </header>
 
-  <main class="form-container" id="dashboard">
-    <h2 id="welcome"></h2>
-    <p><strong>Room:</strong> <span id="room"></span></p>
-    <p><strong>Digital Key:</strong> <span id="key"></span></p>
+  <main>
+    <section class="dashboard-card" id="dashboard">
+      <h2>Welcome, Guest</h2>
+      <p><strong>Room Number:</strong> <span id="roomNumber"></span></p>
+      <p><strong>Guests in Room:</strong> <span id="guestCount"></span></p>
+      <p><strong>Arrival:</strong> <span id="arrivalDate"></span></p>
+      <p><strong>Departure:</strong> <span id="departureDate"></span></p>
+      <p><strong>Digital Key:</strong> <span id="digitalKey"></span></p>
 
-    <hr>
+      <hr>
 
-    <h3>Room Service Request</h3>
-    <form id="serviceForm">
-      <textarea id="serviceText" placeholder="Request (e.g., extra towels, food delivery)" required></textarea>
-      <button type="submit">Submit Request</button>
-    </form>
+      <h3>Room Service Requests</h3>
+      <textarea id="requestText" placeholder="Enter your request (e.g., extra towels, breakfast, cleaning)"></textarea>
+      <button onclick="addServiceRequest()">Submit Request</button>
 
-    <p id="serviceMsg"></p>
-
-    <hr>
-    <button id="logoutBtn">Log Out</button>
+      <h4>Pending Requests:</h4>
+      <ul id="requestList"></ul>
+    </section>
   </main>
 
-  <script>
-    const currentGuest = JSON.parse(localStorage.getItem('currentGuest') || 'null');
-    const dashboard = document.getElementById('dashboard');
-    const serviceForm = document.getElementById('serviceForm');
-    const serviceMsg = document.getElementById('serviceMsg');
-    const logoutBtn = document.getElementById('logoutBtn');
+  <footer>
+    <p>&copy; 2025 Grand Vista Hotel</p>
+  </footer>
 
-    if (!currentGuest) {
-      // No session → back to homepage
-      window.location.href = 'index.html';
-    } else {
-      document.getElementById('welcome').textContent = `Welcome, ${currentGuest.name}!`;
-      document.getElementById('room').textContent = currentGuest.room;
-      document.getElementById('key').textContent = currentGuest.key;
+  <script>
+    // Helper: random departure within 7 days
+    function randomDepartureDate() {
+      const today = new Date();
+      const offset = Math.floor(Math.random() * 7) + 1;
+      const dep = new Date(today);
+      dep.setDate(today.getDate() + offset);
+      return dep.toISOString().split("T")[0];
     }
 
-    serviceForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const text = document.getElementById('serviceText').value.trim();
-      if (!text) return;
+    // Load guest info
+    let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+    if (!currentGuest) {
+      alert("No guest found. Please check in first.");
+      window.location.href = "guest_information.html";
+    }
 
-      const requests = JSON.parse(localStorage.getItem('requests') || '[]');
-      requests.push({
-        guest: currentGuest.name,
-        room: currentGuest.room,
-        request: text,
-        time: new Date().toLocaleString()
-      });
-      localStorage.setItem('requests', JSON.stringify(requests));
+    // Ensure all fields exist
+    if (!currentGuest.arrivalDate) currentGuest.arrivalDate = new Date().toISOString().split("T")[0];
+    if (!currentGuest.departureDate) currentGuest.departureDate = randomDepartureDate();
+    if (!currentGuest.requests) currentGuest.requests = [];
 
-      serviceMsg.textContent = 'Request submitted successfully!';
-      serviceForm.reset();
-    });
+    // Update master guest list
+    let guests = JSON.parse(localStorage.getItem("guests")) || [];
+    const gIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
+    if (gIndex !== -1) {
+      guests[gIndex] = currentGuest;
+    } else {
+      guests.push(currentGuest);
+    }
+    localStorage.setItem("guests", JSON.stringify(guests));
+    localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
 
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('currentGuest');
-      window.location.href = 'index.html';
-    });
+    // Display info
+    document.getElementById("roomNumber").textContent = currentGuest.room;
+    document.getElementById("guestCount").textContent = currentGuest.guestsInRoom || "N/A";
+    document.getElementById("arrivalDate").textContent = currentGuest.arrivalDate;
+    document.getElementById("departureDate").textContent = currentGuest.departureDate;
+    document.getElementById("digitalKey").textContent = currentGuest.key;
+    renderRequests();
+
+    function renderRequests() {
+      const list = document.getElementById("requestList");
+      list.innerHTML = "";
+      if (currentGuest.requests.length === 0) {
+        list.innerHTML = "<li>No pending requests</li>";
+      } else {
+        currentGuest.requests.forEach(r => {
+          const li = document.createElement("li");
+          li.textContent = r;
+          list.appendChild(li);
+        });
+      }
+    }
+
+    function addServiceRequest() {
+      const requestInput = document.getElementById("requestText");
+      const requestText = requestInput.value.trim();
+      if (!requestText) return alert("Please enter a request first.");
+
+      // Reload from storage
+      let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+      let guests = JSON.parse(localStorage.getItem("guests")) || [];
+
+      // Update current guest
+      if (!currentGuest.requests) currentGuest.requests = [];
+      currentGuest.requests.push(requestText);
+
+      // Update master list
+      const guestIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
+      if (guestIndex !== -1) {
+        if (!guests[guestIndex].requests) guests[guestIndex].requests = [];
+        guests[guestIndex].requests.push(requestText);
+      }
+
+      // Save both
+      localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
+      localStorage.setItem("guests", JSON.stringify(guests));
+
+      // Update UI
+      requestInput.value = "";
+      renderRequests();
+      alert("Request submitted successfully!");
+    }
   </script>
 </body>
 </html>
