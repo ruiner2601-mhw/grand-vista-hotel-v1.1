@@ -6,7 +6,6 @@
   <title>Employee Guest Management | Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* --- Table Styling --- */
     table {
       width: 95%;
       margin: 2rem auto;
@@ -17,32 +16,26 @@
       border-radius: 8px;
       box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
     }
-
     th, td {
       border-bottom: 1px solid #e6d8a2;
       padding: 0.75rem 1rem;
       text-align: left;
     }
-
     th {
       background-color: #f9f6ed;
       color: #000;
     }
-
     tr:hover {
       background-color: #fff8dc;
     }
-
     .details {
       display: none;
       background-color: #fefcf6;
     }
-
     .details td {
       border-top: 1px solid #d4af37;
       padding: 1rem 2rem;
     }
-
     button.view-btn {
       background-color: #d4af37;
       color: #fff;
@@ -52,11 +45,9 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-
     button.view-btn:hover {
       background-color: #e5c864;
     }
-
     .toggle-btn {
       background: none;
       border: none;
@@ -64,12 +55,18 @@
       cursor: pointer;
       font-weight: bold;
       font-size: 0.9rem;
-      margin-left: 0.5rem;
+      margin-left: 0.3rem;
     }
-
-    h2 {
-      text-align: center;
-      margin-top: 1.5rem;
+    .inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .timestamp {
+      display: block;
+      font-size: 0.8rem;
+      color: #777;
+      margin-left: 1rem;
     }
   </style>
 </head>
@@ -81,7 +78,7 @@
   </header>
 
   <main>
-    <h2>Current Guests</h2>
+    <h2 style="text-align:center;">Current Guests</h2>
     <table id="guestTable">
       <thead>
         <tr>
@@ -103,7 +100,7 @@
   </footer>
 
   <script>
-    // Generate random departure date within 7 days
+    // Random departure for demo
     function randomDepartureDate() {
       const today = new Date();
       const offset = Math.floor(Math.random() * 7) + 1;
@@ -112,7 +109,14 @@
       return dep.toISOString().split("T")[0];
     }
 
-    // Load and enrich guests data
+    function randomCard() {
+      const cards = ["Visa", "MasterCard", "Amex", "Discover"];
+      const type = cards[Math.floor(Math.random() * cards.length)];
+      const lastFour = Math.floor(1000 + Math.random() * 9000);
+      return { type, lastFour };
+    }
+
+    // Load and enrich guest data
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
     guests = guests.map(g => {
       if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
@@ -121,13 +125,20 @@
       if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
       if (!g.billing) g.billing = "Paid in Full";
       if (!g.requests) g.requests = [];
+      if (!g.creditCard) g.creditCard = randomCard();
+      // Convert old string requests into objects
+      g.requests = g.requests.map(r => {
+        if (typeof r === "string") {
+          return { text: r, date: new Date().toLocaleString(), status: "pending" };
+        }
+        return r;
+      });
       return g;
     });
     localStorage.setItem("guests", JSON.stringify(guests));
 
     const tableBody = document.getElementById("guestTableBody");
 
-    // Helper: Mask string for display
     function maskString(str) {
       if (!str) return "N/A";
       return "****" + str.slice(-3);
@@ -136,40 +147,46 @@
     function renderGuests() {
       tableBody.innerHTML = "";
       guests.forEach((guest, index) => {
-        const requestCount = guest.requests ? guest.requests.length : 0;
-
+        const pendingCount = guest.requests.filter(r => r.status === "pending").length;
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${guest.name}</td>
           <td>${guest.room}</td>
           <td>${guest.arrivalDate}</td>
           <td>${guest.departureDate}</td>
-          <td>${requestCount}</td>
+          <td>${pendingCount}</td>
           <td>${guest.keyStatus}</td>
           <td><button class="view-btn" onclick="toggleDetails(${index})">View Details</button></td>
         `;
 
         const detailRow = document.createElement("tr");
         detailRow.className = "details";
+        const requestsHTML = guest.requests.length
+          ? guest.requests
+              .map(r => `<li>${r.text}<span class="timestamp">${r.date}</span></li>`)
+              .join("")
+          : "<li>No pending requests</li>";
+
         detailRow.innerHTML = `
           <td colspan="7">
-            <strong>Passcode:</strong> 
-            <span id="pass-${index}" class="masked">${maskString(guest.passcode)}</span>
-            <button class="toggle-btn" onclick="toggleMask(${index}, 'pass')">Show</button><br><br>
-            
-            <strong>Digital Key:</strong> 
-            <span id="key-${index}" class="masked">${maskString(guest.key)}</span>
-            <button class="toggle-btn" onclick="toggleMask(${index}, 'key')">Show</button><br><br>
+            <div class="inline"><strong>Passcode:</strong>
+              <span id="pass-${index}" class="masked">${maskString(guest.passcode)}</span>
+              <button class="toggle-btn" onclick="toggleMask(${index}, 'pass')">Show</button>
+            </div><br><br>
+
+            <div class="inline"><strong>Digital Key:</strong>
+              <span id="key-${index}" class="masked">${maskString(guest.key)}</span>
+              <button class="toggle-btn" onclick="toggleMask(${index}, 'key')">Show</button>
+            </div><br><br>
 
             <strong>Service Requests:</strong>
-            <ul>
-              ${guest.requests.length > 0 ? guest.requests.map(r => `<li>${r}</li>`).join("") : "<li>No pending requests</li>"}
-            </ul>
+            <ul>${requestsHTML}</ul>
+
             <strong>Parking Info:</strong> ${guest.parkingInfo}<br>
-            <strong>Billing:</strong> ${guest.billing}
+            <strong>Billing:</strong> ${guest.billing}<br>
+            <strong>Credit Card:</strong> ${guest.creditCard.type} ****${guest.creditCard.lastFour}
           </td>
         `;
-
         tableBody.appendChild(row);
         tableBody.appendChild(detailRow);
       });
@@ -185,7 +202,6 @@
       const span = document.getElementById(`${type}-${index}`);
       const guest = guests[index];
       const isMasked = span.textContent.startsWith("****");
-
       if (isMasked) {
         span.textContent = type === "pass" ? guest.passcode : guest.key;
       } else {
