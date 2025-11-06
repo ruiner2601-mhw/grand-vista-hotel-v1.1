@@ -8,18 +8,23 @@
 </head>
 <body>
   <header class="gv-header">
-    <h1>Guest Records</h1>
+    <h1>Guest Management Board</h1>
   </header>
 
-  <main class="guest-columns">
-    <section class="guest-section">
-      <h2>All Guests</h2>
-      <div id="guestList"></div>
+  <main class="kanban-board">
+    <section class="kanban-column" id="checkedInColumn">
+      <h2>Checked-In Guests</h2>
+      <div class="kanban-list" id="guestList"></div>
     </section>
 
-    <section class="guest-section">
+    <section class="kanban-column" id="pendingColumn">
       <h2>Pending Requests</h2>
-      <div id="pendingList"></div>
+      <div class="kanban-list" id="pendingList"></div>
+    </section>
+
+    <section class="kanban-column" id="completedColumn">
+      <h2>Completed Requests</h2>
+      <div class="kanban-list" id="completedList"></div>
     </section>
   </main>
 
@@ -30,21 +35,21 @@
   <script>
     const guestList = document.getElementById('guestList');
     const pendingList = document.getElementById('pendingList');
+    const completedList = document.getElementById('completedList');
+
     let guests = JSON.parse(localStorage.getItem('guests') || '[]');
     let requests = JSON.parse(localStorage.getItem('requests') || '[]');
+    let completed = JSON.parse(localStorage.getItem('completedRequests') || '[]');
 
-    // Ensure every guest has guestCount
     function ensureGuestCount(guest) {
       if (!guest.guestCount) guest.guestCount = Math.floor(Math.random() * 4) + 1;
       return guest.guestCount;
     }
 
-    function createGuestCard(guest, showRequests = false) {
+    function createGuestCard(guest, category = 'normal') {
       const guestDiv = document.createElement('div');
       guestDiv.className = 'guest-card';
-
       const guestCount = ensureGuestCount(guest);
-      const guestRequests = requests.filter(r => r.guest === guest.name);
 
       guestDiv.innerHTML = `
         <h3>${guest.name}</h3>
@@ -54,7 +59,9 @@
         <p><strong>Digital Key:</strong> ${guest.key}</p>
       `;
 
-      if (showRequests && guestRequests.length > 0) {
+      const guestRequests = requests.filter(r => r.guest === guest.name);
+
+      if (category === 'pending' && guestRequests.length > 0) {
         guestDiv.innerHTML += `<h4>Requests:</h4>`;
         const ul = document.createElement('ul');
         guestRequests.forEach(r => {
@@ -67,27 +74,30 @@
         // Add "Mark as Completed" button
         const doneBtn = document.createElement('button');
         doneBtn.textContent = 'Mark as Completed';
-        doneBtn.addEventListener('click', () => completeRequests(guest.name, guestDiv));
+        doneBtn.addEventListener('click', () => markAsCompleted(guest, guestDiv));
         guestDiv.appendChild(doneBtn);
       }
 
       return guestDiv;
     }
 
-    function completeRequests(guestName, cardElement) {
-      // Remove all requests for this guest
-      requests = requests.filter(r => r.guest !== guestName);
+    function markAsCompleted(guest, cardElement) {
+      // Remove requests for this guest and move to completed column
+      requests = requests.filter(r => r.guest !== guest.name);
+      completed.push(guest);
       localStorage.setItem('requests', JSON.stringify(requests));
+      localStorage.setItem('completedRequests', JSON.stringify(completed));
 
-      // Move card to All Guests section
-      cardElement.querySelector('button')?.remove(); // remove button
+      // Move visually
       pendingList.removeChild(cardElement);
-      guestList.appendChild(cardElement);
+      cardElement.querySelector('button')?.remove();
+      completedList.appendChild(cardElement);
     }
 
     function loadGuests() {
       guestList.innerHTML = '';
       pendingList.innerHTML = '';
+      completedList.innerHTML = '';
 
       if (guests.length === 0) {
         guestList.innerHTML = '<p>No guests currently checked in.</p>';
@@ -96,12 +106,14 @@
 
       guests.forEach(guest => {
         const guestRequests = requests.filter(r => r.guest === guest.name);
-        const card = createGuestCard(guest, true);
+        const isCompleted = completed.some(c => c.name === guest.name);
 
-        if (guestRequests.length > 0) {
-          pendingList.appendChild(card);
+        if (isCompleted) {
+          completedList.appendChild(createGuestCard(guest, 'completed'));
+        } else if (guestRequests.length > 0) {
+          pendingList.appendChild(createGuestCard(guest, 'pending'));
         } else {
-          guestList.appendChild(card);
+          guestList.appendChild(createGuestCard(guest, 'normal'));
         }
       });
 
