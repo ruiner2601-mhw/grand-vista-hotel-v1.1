@@ -1,21 +1,47 @@
+/* ================================
+   Grand Vista Hotel - Global Style
+   ================================ */
+
 :root {
   --primary: #000;
   --secondary: #fff;
-  --accent: gold;
-  --bg-light: #111;
+  --accent: #d4af37; /* elegant gold */
+  --background: #111;
+  --card-bg: #1a1a1a;
+  --muted: #aaa;
+  --error: #ff5555;
 }
 
+/* ---------- GLOBAL ---------- */
 body {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: "Georgia", serif;
   background-color: var(--primary);
   color: var(--secondary);
+  line-height: 1.5;
 }
 
-.gv-header {
+h1, h2, h3, h4 {
+  color: var(--accent);
   text-align: center;
-  padding: 1.5rem;
+  margin-top: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- HEADER ---------- */
+.gv-header {
+  background-color: var(--background);
   border-bottom: 2px solid var(--accent);
+  text-align: center;
+  padding: 1.5rem 1rem;
 }
 
 .gv-logo {
@@ -24,6 +50,7 @@ body {
   margin: 0 auto 0.5rem;
 }
 
+/* ---------- HOME LINKS ---------- */
 .home-links {
   text-align: center;
   padding: 2rem;
@@ -39,29 +66,42 @@ body {
 }
 
 .home-links a {
-  color: var(--accent);
-  text-decoration: none;
   font-size: 1.2rem;
+  color: var(--accent);
+  transition: color 0.3s;
 }
 
+.home-links a:hover {
+  color: #fff3c0;
+}
+
+/* ---------- FORMS & CONTAINERS ---------- */
 .form-container {
-  max-width: 320px;
+  max-width: 380px;
+  background-color: var(--card-bg);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
   margin: 2rem auto;
   padding: 2rem;
-  border: 2px solid var(--accent);
-  background: var(--bg-light);
   text-align: center;
-  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
 }
 
-input, button {
-  display: block;
+input, button, textarea, select {
   width: 100%;
-  margin: 0.8rem 0;
-  padding: 0.6rem;
+  padding: 0.7rem;
+  margin: 0.6rem 0;
   font-size: 1rem;
   border-radius: 4px;
   border: 1px solid var(--accent);
+  background-color: var(--secondary);
+  color: var(--primary);
+  font-family: inherit;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
 button {
@@ -69,8 +109,32 @@ button {
   color: var(--primary);
   font-weight: bold;
   cursor: pointer;
+  border: none;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.error {
-  color: red;
+button:hover {
+  background-color: #c0a060;
+  transform: translateY(-1px);
 }
+
+/* ---------- MESSAGES ---------- */
+.error {
+  color: var(--error);
+}
+
+.muted {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ---------- DASHBOARD ---------- */
+#dashboard {
+  text-align: left;
+}
+
+#dashboard h2 {
+  text-align: center;
+}
+
+#dashbo
