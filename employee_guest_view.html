@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Guest View – Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="gv-header">
+    <h1>Guest Records</h1>
+  </header>
+
+  <main class="form-container" id="guestView">
+    <h2>All Guest Data</h2>
+    <div id="guestList"></div>
+    <hr>
+    <button onclick="window.location.href='employee_index.html'">Back to Dashboard</button>
+  </main>
+
+  <script>
+    const guestList = document.getElementById('guestList');
+    const guests = JSON.parse(localStorage.getItem('guests') || '[]');
+    const requests = JSON.parse(localStorage.getItem('requests') || '[]');
+
+    if (guests.length === 0) {
+      guestList.innerHTML = '<p>No guests currently checked in.</p>';
+    } else {
+      guests.forEach(g => {
+        const guestDiv = document.createElement('div');
+        guestDiv.className = 'guest-card';
+        guestDiv.innerHTML = `
+          <h3>${g.name}</h3>
+          <p><strong>Room:</strong> ${g.room}</p>
+          <p><strong>Passcode:</strong> ${g.passcode}</p>
+          <p><strong>Digital Key:</strong> ${g.key}</p>
+          <h4>Room Requests:</h4>
+        `;
+
+        const guestRequests = requests.filter(r => r.guest === g.name);
+        if (guestRequests.length === 0) {
+          guestDiv.innerHTML += `<p class="muted">No requests submitted.</p>`;
+        } else {
+          const ul = document.createElement('ul');
+          guestRequests.forEach(r => {
+            const li = document.createElement('li');
+            li.textContent = `${r.time}: ${r.request}`;
+            ul.appendChild(li);
+          });
+          guestDiv.appendChild(ul);
+        }
+
+        guestDiv.innerHTML += '<hr>';
+        guestList.appendChild(guestDiv);
+      });
+    }
+  </script>
+</body>
+</html>
