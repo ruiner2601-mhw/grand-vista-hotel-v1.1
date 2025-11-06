@@ -11,63 +11,104 @@
     <h1>Guest Records</h1>
   </header>
 
-  <main class="form-container" id="guestView">
-    <h2>All Guest Information</h2>
-    <div id="guestList"></div>
-    <hr>
-    <button onclick="window.location.href='employee_index.html'">Back to Dashboard</button>
+  <main class="guest-columns">
+    <section class="guest-section">
+      <h2>All Guests</h2>
+      <div id="guestList"></div>
+    </section>
+
+    <section class="guest-section">
+      <h2>Pending Requests</h2>
+      <div id="pendingList"></div>
+    </section>
   </main>
+
+  <div class="center-btn">
+    <button onclick="window.location.href='employee_index.html'">Back to Dashboard</button>
+  </div>
 
   <script>
     const guestList = document.getElementById('guestList');
-    const guests = JSON.parse(localStorage.getItem('guests') || '[]');
-    const requests = JSON.parse(localStorage.getItem('requests') || '[]');
+    const pendingList = document.getElementById('pendingList');
+    let guests = JSON.parse(localStorage.getItem('guests') || '[]');
+    let requests = JSON.parse(localStorage.getItem('requests') || '[]');
 
+    // Ensure every guest has guestCount
     function ensureGuestCount(guest) {
-      // Assign random guest count 1–4 if not present
-      if (!guest.guestCount) {
-        guest.guestCount = Math.floor(Math.random() * 4) + 1;
-      }
+      if (!guest.guestCount) guest.guestCount = Math.floor(Math.random() * 4) + 1;
       return guest.guestCount;
     }
 
-    if (guests.length === 0) {
-      guestList.innerHTML = '<p>No guests currently checked in.</p>';
-    } else {
-      guests.forEach(g => {
-        const guestCount = ensureGuestCount(g);
+    function createGuestCard(guest, showRequests = false) {
+      const guestDiv = document.createElement('div');
+      guestDiv.className = 'guest-card';
 
-        const guestDiv = document.createElement('div');
-        guestDiv.className = 'guest-card';
-        guestDiv.innerHTML = `
-          <h3>${g.name}</h3>
-          <p><strong>Room:</strong> ${g.room}</p>
-          <p><strong>Guests in Room:</strong> ${guestCount}</p>
-          <p><strong>Passcode:</strong> ${g.passcode}</p>
-          <p><strong>Digital Key:</strong> ${g.key}</p>
-          <h4>Room Requests:</h4>
-        `;
+      const guestCount = ensureGuestCount(guest);
+      const guestRequests = requests.filter(r => r.guest === guest.name);
 
-        const guestRequests = requests.filter(r => r.guest === g.name);
-        if (guestRequests.length === 0) {
-          guestDiv.innerHTML += `<p class="muted">No requests submitted.</p>`;
+      guestDiv.innerHTML = `
+        <h3>${guest.name}</h3>
+        <p><strong>Room:</strong> ${guest.room}</p>
+        <p><strong>Guests in Room:</strong> ${guestCount}</p>
+        <p><strong>Passcode:</strong> ${guest.passcode}</p>
+        <p><strong>Digital Key:</strong> ${guest.key}</p>
+      `;
+
+      if (showRequests && guestRequests.length > 0) {
+        guestDiv.innerHTML += `<h4>Requests:</h4>`;
+        const ul = document.createElement('ul');
+        guestRequests.forEach(r => {
+          const li = document.createElement('li');
+          li.textContent = `${r.time}: ${r.request}`;
+          ul.appendChild(li);
+        });
+        guestDiv.appendChild(ul);
+
+        // Add "Mark as Completed" button
+        const doneBtn = document.createElement('button');
+        doneBtn.textContent = 'Mark as Completed';
+        doneBtn.addEventListener('click', () => completeRequests(guest.name, guestDiv));
+        guestDiv.appendChild(doneBtn);
+      }
+
+      return guestDiv;
+    }
+
+    function completeRequests(guestName, cardElement) {
+      // Remove all requests for this guest
+      requests = requests.filter(r => r.guest !== guestName);
+      localStorage.setItem('requests', JSON.stringify(requests));
+
+      // Move card to All Guests section
+      cardElement.querySelector('button')?.remove(); // remove button
+      pendingList.removeChild(cardElement);
+      guestList.appendChild(cardElement);
+    }
+
+    function loadGuests() {
+      guestList.innerHTML = '';
+      pendingList.innerHTML = '';
+
+      if (guests.length === 0) {
+        guestList.innerHTML = '<p>No guests currently checked in.</p>';
+        return;
+      }
+
+      guests.forEach(guest => {
+        const guestRequests = requests.filter(r => r.guest === guest.name);
+        const card = createGuestCard(guest, true);
+
+        if (guestRequests.length > 0) {
+          pendingList.appendChild(card);
         } else {
-          const ul = document.createElement('ul');
-          guestRequests.forEach(r => {
-            const li = document.createElement('li');
-            li.textContent = `${r.time}: ${r.request}`;
-            ul.appendChild(li);
-          });
-          guestDiv.appendChild(ul);
+          guestList.appendChild(card);
         }
-
-        guestDiv.innerHTML += '<hr>';
-        guestList.appendChild(guestDiv);
       });
 
-      // Save updated guest counts back to localStorage
       localStorage.setItem('guests', JSON.stringify(guests));
     }
+
+    loadGuests();
   </script>
 </body>
 </html>
