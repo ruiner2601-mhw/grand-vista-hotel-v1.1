@@ -14,7 +14,6 @@
   <main class="form-container">
     <form id="checkinForm">
       <input type="text" id="guestName" placeholder="Full Name" required />
-      <input type="text" id="guestRoom" placeholder="Room Number" required />
       <input type="text" id="guestPasscode" placeholder="Create a Passcode" required />
       <button type="submit">Check In</button>
     </form>
@@ -25,18 +24,26 @@
     const form = document.getElementById('checkinForm');
     const msg = document.getElementById('successMsg');
 
+    function generateRoomNumber(existingGuests) {
+      // Generate next available room number between 101 and 999
+      let room = 101;
+      const usedRooms = existingGuests.map(g => Number(g.room));
+      while (usedRooms.includes(room)) room++;
+      return room;
+    }
+
     form.addEventListener('submit', e => {
       e.preventDefault();
       const name = guestName.value.trim();
-      const room = guestRoom.value.trim();
       const pass = guestPasscode.value.trim();
-      if (!name || !room || !pass) return;
+      if (!name || !pass) return;
 
       const guests = JSON.parse(localStorage.getItem('guests') || '[]');
-      guests.push({ name, room, passcode: pass });
+      const room = generateRoomNumber(guests);
+      guests.push({ name, passcode: pass, room });
       localStorage.setItem('guests', JSON.stringify(guests));
 
-      msg.textContent = `Welcome, ${name}! You have checked into room ${room}.`;
+      msg.textContent = `Welcome, ${name}! You’ve been assigned to room ${room}.`;
       form.reset();
     });
   </script>
