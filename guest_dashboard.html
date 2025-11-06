@@ -57,7 +57,7 @@
 
   <main>
     <section class="dashboard-card" id="dashboard">
-      <h2>Welcome, Guest</h2>
+      <h2 id="guestNameHeader">Welcome, Guest</h2>
       <p><strong>Room Number:</strong> <span id="roomNumber"></span></p>
       <p><strong>Guests in Room:</strong> <span id="guestCount"></span></p>
       <p><strong>Arrival:</strong> <span id="arrivalDate"></span></p>
@@ -80,7 +80,7 @@
   </footer>
 
   <script>
-    // Random date helper
+    // Helper for random departure
     function randomDepartureDate() {
       const today = new Date();
       const offset = Math.floor(Math.random() * 7) + 1;
@@ -89,7 +89,7 @@
       return dep.toISOString().split("T")[0];
     }
 
-    // Load guest data
+    // Load current guest
     let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
     if (!currentGuest) {
       alert("No guest found. Please check in first.");
@@ -100,7 +100,7 @@
     if (!currentGuest.departureDate) currentGuest.departureDate = randomDepartureDate();
     if (!currentGuest.requests) currentGuest.requests = [];
 
-    // 🩹 Convert old plain string requests to object format
+    // Fix old string-only requests
     currentGuest.requests = currentGuest.requests.map(r => {
       if (typeof r === "string") {
         return { text: r, date: new Date().toLocaleString(), status: "pending" };
@@ -108,18 +108,17 @@
       return r;
     });
 
-    // Sync master guest list
+    // Sync with master list
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
     const gIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
-    if (gIndex !== -1) {
-      guests[gIndex] = currentGuest;
-    } else {
-      guests.push(currentGuest);
-    }
+    if (gIndex !== -1) guests[gIndex] = currentGuest;
+    else guests.push(currentGuest);
     localStorage.setItem("guests", JSON.stringify(guests));
     localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
 
-    // Display guest info
+    // Show guest info
+    document.getElementById("guestNameHeader").textContent =
+      currentGuest.name ? `Welcome, ${currentGuest.name}` : "Welcome, Guest";
     document.getElementById("roomNumber").textContent = currentGuest.room;
     document.getElementById("guestCount").textContent = currentGuest.guestsInRoom || "N/A";
     document.getElementById("arrivalDate").textContent = currentGuest.arrivalDate;
@@ -130,7 +129,6 @@
     function renderRequests() {
       const list = document.getElementById("requestList");
       currentGuest = JSON.parse(localStorage.getItem("currentGuest")) || currentGuest;
-
       list.innerHTML = "";
 
       if (!currentGuest.requests || currentGuest.requests.length === 0) {
@@ -148,35 +146,32 @@
       });
     }
 
-    // Add new request
+    // Add request
     function addServiceRequest() {
-      const requestInput = document.getElementById("requestText");
-      const requestText = requestInput.value.trim();
+      const input = document.getElementById("requestText");
+      const requestText = input.value.trim();
       if (!requestText) return alert("Please enter a request first.");
 
       const now = new Date();
-      const dateStr = now.toLocaleString();
-      const newRequest = { text: requestText, date: dateStr, status: "pending" };
+      const newRequest = { text: requestText, date: now.toLocaleString(), status: "pending" };
 
       let guests = JSON.parse(localStorage.getItem("guests")) || [];
-
       if (!currentGuest.requests) currentGuest.requests = [];
       currentGuest.requests.push(newRequest);
 
-      const guestIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
-      if (guestIndex !== -1) {
-        if (!guests[guestIndex].requests) guests[guestIndex].requests = [];
-        guests[guestIndex].requests.push(newRequest);
+      const idx = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
+      if (idx !== -1) {
+        if (!guests[idx].requests) guests[idx].requests = [];
+        guests[idx].requests.push(newRequest);
       }
 
       localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
       localStorage.setItem("guests", JSON.stringify(guests));
-
-      requestInput.value = "";
+      input.value = "";
       renderRequests();
     }
 
-    // Auto-refresh requests every 2s
+    // Auto-refresh requests every 2 seconds
     setInterval(() => {
       const updatedGuest = JSON.parse(localStorage.getItem("currentGuest"));
       if (JSON.stringify(updatedGuest.requests) !== JSON.stringify(currentGuest.requests)) {
