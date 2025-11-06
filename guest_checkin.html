@@ -25,7 +25,6 @@
     const msg = document.getElementById('successMsg');
 
     function generateRoomNumber(existingGuests) {
-      // Automatically assign next available room number
       let room = 101;
       const usedRooms = existingGuests.map(g => Number(g.room));
       while (usedRooms.includes(room)) room++;
@@ -33,7 +32,6 @@
     }
 
     function generateKey() {
-      // Generate a random key code (example: GVH-58423)
       const digits = Math.floor(10000 + Math.random() * 90000);
       return `GVH-${digits}`;
     }
@@ -48,18 +46,12 @@
       const room = generateRoomNumber(guests);
       const key = generateKey();
 
-      // Store guest info
-      guests.push({ name, passcode: pass, room, key });
+      const newGuest = { name, passcode: pass, room, key };
+      guests.push(newGuest);
       localStorage.setItem('guests', JSON.stringify(guests));
+      localStorage.setItem('currentGuest', JSON.stringify(newGuest));
 
-      msg.innerHTML = `
-        Welcome, <strong>${name}</strong>!<br>
-        You’ve been assigned to room <strong>${room}</strong>.<br>
-        Your digital key is <strong>${key}</strong>.<br>
-        <br>
-        You can view your key anytime at the <a href="guest_key.html">Digital Key page</a>.
-      `;
-      form.reset();
+      window.location.href = 'guest_dashboard.html';
     });
   </script>
 </body>
