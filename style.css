@@ -1,6 +1,6 @@
-/* ================================
-   Grand Vista Hotel - Global Style
-   ================================ */
+/* =======================================
+   Grand Vista Hotel - Global Stylesheet
+   ======================================= */
 
 :root {
   --primary: #000;
@@ -137,4 +137,43 @@ button:hover {
   text-align: center;
 }
 
-#dashbo
+#dashboard p {
+  margin: 0.4rem 0;
+}
+
+#dashboard hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--accent);
+}
+
+/* ---------- GUEST CARDS ---------- */
+.guest-card {
+  background-color: var(--card-bg);
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  text-align: left;
+}
+
+.guest-card h3 {
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+.guest-card p {
+  margin: 0.2rem 0;
+}
+
+.guest-card ul {
+  padding-left: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.guest-card li {
+  color: var(--secondary);
+  margin-bottom: 0.4rem;
+}
+
+/* ---------- KANBAN BOARD (EMPLOYEE VIEW) -----*
