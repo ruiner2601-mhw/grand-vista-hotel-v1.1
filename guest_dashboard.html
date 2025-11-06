@@ -21,9 +21,6 @@
       text-align: center;
       margin-bottom: 1rem;
     }
-    .dashboard-card p {
-      margin: 0.5rem 0;
-    }
     textarea {
       width: 100%;
       padding: 0.7rem;
@@ -39,12 +36,15 @@
       background: #fff8dc;
       border: 1px solid #d4af37;
       border-radius: 6px;
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1rem;
       margin-top: 0.5rem;
+      font-size: 0.95rem;
     }
-    h4 {
-      margin-top: 1.5rem;
-      color: #000;
+    .timestamp {
+      display: block;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 0.2rem;
     }
   </style>
 </head>
@@ -99,14 +99,11 @@
     if (!currentGuest.departureDate) currentGuest.departureDate = randomDepartureDate();
     if (!currentGuest.requests) currentGuest.requests = [];
 
-    // Sync to master guest list
+    // Sync guest with master list
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
     const gIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
-    if (gIndex !== -1) {
-      guests[gIndex] = currentGuest;
-    } else {
-      guests.push(currentGuest);
-    }
+    if (gIndex !== -1) guests[gIndex] = currentGuest;
+    else guests.push(currentGuest);
     localStorage.setItem("guests", JSON.stringify(guests));
     localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
 
@@ -117,55 +114,65 @@
     document.getElementById("departureDate").textContent = currentGuest.departureDate;
     document.getElementById("digitalKey").textContent = currentGuest.key;
 
-    // Render requests (newest first)
+    // Render requests
     function renderRequests() {
       const list = document.getElementById("requestList");
+      currentGuest = JSON.parse(localStorage.getItem("currentGuest")) || currentGuest;
       list.innerHTML = "";
+
       if (!currentGuest.requests || currentGuest.requests.length === 0) {
         list.innerHTML = "<li>No pending requests</li>";
         return;
       }
 
-      // Show newest first
-      const sortedRequests = [...currentGuest.requests].reverse();
-      sortedRequests.forEach(r => {
+      const sorted = [...currentGuest.requests].reverse();
+      sorted.forEach(req => {
         const li = document.createElement("li");
-        li.textContent = r;
+        li.innerHTML = `${req.text}<span class="timestamp">${req.date}</span>`;
         list.appendChild(li);
       });
     }
 
-    renderRequests();
-
-    // Add service request
+    // Submit request
     function addServiceRequest() {
       const requestInput = document.getElementById("requestText");
       const requestText = requestInput.value.trim();
       if (!requestText) return alert("Please enter a request first.");
 
-      // Reload data
+      const now = new Date();
+      const dateStr = now.toLocaleString();
+
       let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
       let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-      // Add to both current guest and master guest list
+      const newRequest = { text: requestText, date: dateStr, status: "pending" };
+
       if (!currentGuest.requests) currentGuest.requests = [];
-      currentGuest.requests.push(requestText);
+      currentGuest.requests.push(newRequest);
 
       const guestIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
       if (guestIndex !== -1) {
         if (!guests[guestIndex].requests) guests[guestIndex].requests = [];
-        guests[guestIndex].requests.push(requestText);
+        guests[guestIndex].requests.push(newRequest);
       }
 
-      // Save updates
       localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
       localStorage.setItem("guests", JSON.stringify(guests));
 
-      // Refresh UI
       requestInput.value = "";
       renderRequests();
-      alert("Request submitted successfully!");
     }
+
+    // Live auto-refresh (every 2 seconds)
+    setInterval(() => {
+      const updatedGuest = JSON.parse(localStorage.getItem("currentGuest"));
+      if (JSON.stringify(updatedGuest.requests) !== JSON.stringify(currentGuest.requests)) {
+        currentGuest = updatedGuest;
+        renderRequests();
+      }
+    }, 2000);
+
+    renderRequests();
   </script>
 </body>
 </html>
