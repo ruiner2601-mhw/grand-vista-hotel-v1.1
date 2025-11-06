@@ -42,6 +42,10 @@
       padding: 0.5rem 1rem;
       margin-top: 0.5rem;
     }
+    h4 {
+      margin-top: 1.5rem;
+      color: #000;
+    }
   </style>
 </head>
 <body>
@@ -66,7 +70,7 @@
       <textarea id="requestText" placeholder="Enter your request (e.g., extra towels, breakfast, cleaning)"></textarea>
       <button onclick="addServiceRequest()">Submit Request</button>
 
-      <h4>Pending Requests:</h4>
+      <h4>Pending Requests (Newest First):</h4>
       <ul id="requestList"></ul>
     </section>
   </main>
@@ -76,7 +80,6 @@
   </footer>
 
   <script>
-    // Helper: random departure within 7 days
     function randomDepartureDate() {
       const today = new Date();
       const offset = Math.floor(Math.random() * 7) + 1;
@@ -92,12 +95,11 @@
       window.location.href = "guest_information.html";
     }
 
-    // Ensure all fields exist
     if (!currentGuest.arrivalDate) currentGuest.arrivalDate = new Date().toISOString().split("T")[0];
     if (!currentGuest.departureDate) currentGuest.departureDate = randomDepartureDate();
     if (!currentGuest.requests) currentGuest.requests = [];
 
-    // Update master guest list
+    // Sync to master guest list
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
     const gIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
     if (gIndex !== -1) {
@@ -108,53 +110,58 @@
     localStorage.setItem("guests", JSON.stringify(guests));
     localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
 
-    // Display info
+    // Display guest info
     document.getElementById("roomNumber").textContent = currentGuest.room;
     document.getElementById("guestCount").textContent = currentGuest.guestsInRoom || "N/A";
     document.getElementById("arrivalDate").textContent = currentGuest.arrivalDate;
     document.getElementById("departureDate").textContent = currentGuest.departureDate;
     document.getElementById("digitalKey").textContent = currentGuest.key;
-    renderRequests();
 
+    // Render requests (newest first)
     function renderRequests() {
       const list = document.getElementById("requestList");
       list.innerHTML = "";
-      if (currentGuest.requests.length === 0) {
+      if (!currentGuest.requests || currentGuest.requests.length === 0) {
         list.innerHTML = "<li>No pending requests</li>";
-      } else {
-        currentGuest.requests.forEach(r => {
-          const li = document.createElement("li");
-          li.textContent = r;
-          list.appendChild(li);
-        });
+        return;
       }
+
+      // Show newest first
+      const sortedRequests = [...currentGuest.requests].reverse();
+      sortedRequests.forEach(r => {
+        const li = document.createElement("li");
+        li.textContent = r;
+        list.appendChild(li);
+      });
     }
 
+    renderRequests();
+
+    // Add service request
     function addServiceRequest() {
       const requestInput = document.getElementById("requestText");
       const requestText = requestInput.value.trim();
       if (!requestText) return alert("Please enter a request first.");
 
-      // Reload from storage
+      // Reload data
       let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
       let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-      // Update current guest
+      // Add to both current guest and master guest list
       if (!currentGuest.requests) currentGuest.requests = [];
       currentGuest.requests.push(requestText);
 
-      // Update master list
       const guestIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
       if (guestIndex !== -1) {
         if (!guests[guestIndex].requests) guests[guestIndex].requests = [];
         guests[guestIndex].requests.push(requestText);
       }
 
-      // Save both
+      // Save updates
       localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
       localStorage.setItem("guests", JSON.stringify(guests));
 
-      // Update UI
+      // Refresh UI
       requestInput.value = "";
       renderRequests();
       alert("Request submitted successfully!");
