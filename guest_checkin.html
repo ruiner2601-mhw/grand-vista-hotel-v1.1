@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest Check-In – Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="gv-header">
+    <h1>Guest Check-In</h1>
+  </header>
+
+  <main class="form-container">
+    <form id="checkinForm">
+      <input type="text" id="guestName" placeholder="Full Name" required />
+      <input type="text" id="guestRoom" placeholder="Room Number" required />
+      <input type="text" id="guestPasscode" placeholder="Create a Passcode" required />
+      <button type="submit">Check In</button>
+    </form>
+    <p id="successMsg"></p>
+  </main>
+
+  <script>
+    const form = document.getElementById('checkinForm');
+    const msg = document.getElementById('successMsg');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = guestName.value.trim();
+      const room = guestRoom.value.trim();
+      const pass = guestPasscode.value.trim();
+      if (!name || !room || !pass) return;
+
+      const guests = JSON.parse(localStorage.getItem('guests') || '[]');
+      guests.push({ name, room, passcode: pass });
+      localStorage.setItem('guests', JSON.stringify(guests));
+
+      msg.textContent = `Welcome, ${name}! You have checked into room ${room}.`;
+      form.reset();
+    });
+  </script>
+</body>
+</html>

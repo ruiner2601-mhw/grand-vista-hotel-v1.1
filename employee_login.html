@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee Login – Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="gv-header">
+    <h1>Employee Login</h1>
+  </header>
+
+  <main class="form-container">
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+    <p id="errorMsg" class="error"></p>
+  </main>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const err = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const u = username.value.trim();
+      const p = password.value.trim();
+      if (u === 'admin' && p === 'grandvista') {
+        window.location.href = 'employee_index.html';
+      } else {
+        err.textContent = 'Invalid credentials';
+      }
+    });
+  </script>
+</body>
+</html>
