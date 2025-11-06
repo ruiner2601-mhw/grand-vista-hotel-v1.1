@@ -8,28 +8,58 @@
 </head>
 <body>
   <header class="gv-header">
-    <img src="GV-logo.png" alt="Grand Vista Hotel logo" class="gv-logo" />
-    <h1>Grand Vista Hotel</h1>
+    <h1>Welcome to Grand Vista Hotel</h1>
   </header>
 
-  <main class="home-links">
-    <h2>Welcome to Grand Vista Hotel</h2>
-    <p>Please choose an option below:</p>
-    <section class="portal-section">
-      <h3>Guest Portal</h3>
+  <main>
+    <section class="home-links">
+      <h2>Guest Services</h2>
       <ul>
-        <li><a href="guest_checkin.html">Guest Check-In</a></li>
-        <li><a href="guest_requests.html">Room Service Requests</a></li>
-        <li><a href="guest_key.html">Digital Key</a></li>
+        <li><a href="guest_information.html">Guest Information</a></li>
+        <li><a href="guest_dashboard.html">Guest Dashboard</a></li>
+      </ul>
+
+      <h2>Employee Access</h2>
+      <ul>
+        <li><a href="employee_login.html">Employee Login</a></li>
+        <li><a href="employee_guest_view.html">Guest Records</a></li>
       </ul>
     </section>
 
-    <section class="portal-section">
-      <h3>Employee Portal</h3>
-      <ul>
-        <li><a href="employee_login.html">Employee Login</a></li>
-      </ul>
+    <hr>
+
+    <!-- Team Login Section -->
+    <section class="form-container">
+      <h2>Project Management Login</h2>
+      <form id="teamLoginForm">
+        <input type="text" id="teamUsername" placeholder="Username" required />
+        <input type="password" id="teamPassword" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+      <p id="teamError" class="error"></p>
     </section>
   </main>
+
+  <footer style="text-align:center; padding:1rem; color:#888;">
+    <p>&copy; 2025 Grand Vista Hotel | Internal Demonstration Only</p>
+  </footer>
+
+  <script>
+    // Team login logic
+    const form = document.getElementById('teamLoginForm');
+    const errorMsg = document.getElementById('teamError');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const user = teamUsername.value.trim();
+      const pass = teamPassword.value.trim();
+
+      if (user === 'team' && pass === 'change') {
+        window.location.href = 'team_panel.html';
+      } else {
+        errorMsg.textContent = 'Invalid credentials';
+      }
+    });
+  </script>
 </body>
 </html>
