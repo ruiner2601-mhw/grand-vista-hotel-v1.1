@@ -3,124 +3,162 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Employee Guest View – Grand Vista Hotel</title>
+  <title>Employee Guest Management | Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Table-specific styling */
+    table {
+      width: 95%;
+      margin: 2rem auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      color: #000;
+      border: 2px solid #d4af37;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+    }
+
+    th, td {
+      border-bottom: 1px solid #e6d8a2;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f9f6ed;
+      color: #000;
+    }
+
+    tr:hover {
+      background-color: #fff8dc;
+    }
+
+    .details {
+      display: none;
+      background-color: #fefcf6;
+    }
+
+    .details td {
+      border-top: 1px solid #d4af37;
+      padding: 1rem 2rem;
+    }
+
+    button.view-btn {
+      background-color: #d4af37;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button.view-btn:hover {
+      background-color: #e5c864;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+  </style>
 </head>
 <body>
   <header class="gv-header">
+    <img src="V.png" alt="Grand Vista Hotel Logo" style="height:100px; margin-bottom:1rem;">
     <h1>Guest Management Board</h1>
+    <p>View guest details, room assignments, and service requests</p>
   </header>
 
-  <main class="kanban-board">
-    <section class="kanban-column" id="checkedInColumn">
-      <h2>Checked-In Guests</h2>
-      <div class="kanban-list" id="guestList"></div>
-    </section>
-
-    <section class="kanban-column" id="pendingColumn">
-      <h2>Pending Requests</h2>
-      <div class="kanban-list" id="pendingList"></div>
-    </section>
-
-    <section class="kanban-column" id="completedColumn">
-      <h2>Completed Requests</h2>
-      <div class="kanban-list" id="completedList"></div>
-    </section>
+  <main>
+    <h2>Current Guests</h2>
+    <table id="guestTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Room</th>
+          <th>Arrival</th>
+          <th>Departure</th>
+          <th>Key</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="guestTableBody"></tbody>
+    </table>
   </main>
 
-  <div class="center-btn">
-    <button onclick="window.location.href='employee_index.html'">Back to Dashboard</button>
-  </div>
+  <footer>
+    <p>&copy; 2025 Grand Vista Hotel</p>
+  </footer>
 
   <script>
-    const guestList = document.getElementById('guestList');
-    const pendingList = document.getElementById('pendingList');
-    const completedList = document.getElementById('completedList');
-
-    let guests = JSON.parse(localStorage.getItem('guests') || '[]');
-    let requests = JSON.parse(localStorage.getItem('requests') || '[]');
-    let completed = JSON.parse(localStorage.getItem('completedRequests') || '[]');
-
-    function ensureGuestCount(guest) {
-      if (!guest.guestCount) guest.guestCount = Math.floor(Math.random() * 4) + 1;
-      return guest.guestCount;
+    // Generate random date between today and +7 days
+    function randomDepartureDate() {
+      const today = new Date();
+      const offset = Math.floor(Math.random() * 7) + 1;
+      const departure = new Date(today);
+      departure.setDate(today.getDate() + offset);
+      return departure.toISOString().split('T')[0];
     }
 
-    function createGuestCard(guest, category = 'normal') {
-      const guestDiv = document.createElement('div');
-      guestDiv.className = 'guest-card';
-      const guestCount = ensureGuestCount(guest);
+    // Load guest data
+    let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-      guestDiv.innerHTML = `
-        <h3>${guest.name}</h3>
-        <p><strong>Room:</strong> ${guest.room}</p>
-        <p><strong>Guests in Room:</strong> ${guestCount}</p>
-        <p><strong>Passcode:</strong> ${guest.passcode}</p>
-        <p><strong>Digital Key:</strong> ${guest.key}</p>
-      `;
+    // If guests have no date fields, add them
+    guests = guests.map(g => {
+      if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
+      if (!g.departureDate) g.departureDate = randomDepartureDate();
+      if (!g.keyStatus) g.keyStatus = "Active";
+      if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
+      if (!g.billing) g.billing = "Paid in Full";
+      return g;
+    });
 
-      const guestRequests = requests.filter(r => r.guest === guest.name);
+    localStorage.setItem("guests", JSON.stringify(guests));
 
-      if (category === 'pending' && guestRequests.length > 0) {
-        guestDiv.innerHTML += `<h4>Requests:</h4>`;
-        const ul = document.createElement('ul');
-        guestRequests.forEach(r => {
-          const li = document.createElement('li');
-          li.textContent = `${r.time}: ${r.request}`;
-          ul.appendChild(li);
-        });
-        guestDiv.appendChild(ul);
+    const tableBody = document.getElementById("guestTableBody");
 
-        // Add "Mark as Completed" button
-        const doneBtn = document.createElement('button');
-        doneBtn.textContent = 'Mark as Completed';
-        doneBtn.addEventListener('click', () => markAsCompleted(guest, guestDiv));
-        guestDiv.appendChild(doneBtn);
-      }
+    function renderGuests() {
+      tableBody.innerHTML = "";
 
-      return guestDiv;
-    }
+      guests.forEach((guest, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${guest.name}</td>
+          <td>${guest.room}</td>
+          <td>${guest.arrivalDate}</td>
+          <td>${guest.departureDate}</td>
+          <td>${guest.keyStatus}</td>
+          <td><button class="view-btn" onclick="toggleDetails(${index})">View Details</button></td>
+        `;
 
-    function markAsCompleted(guest, cardElement) {
-      // Remove requests for this guest and move to completed column
-      requests = requests.filter(r => r.guest !== guest.name);
-      completed.push(guest);
-      localStorage.setItem('requests', JSON.stringify(requests));
-      localStorage.setItem('completedRequests', JSON.stringify(completed));
+        const detailRow = document.createElement("tr");
+        detailRow.className = "details";
+        detailRow.innerHTML = `
+          <td colspan="6">
+            <strong>Service Requests:</strong>
+            <ul>
+              ${guest.requests && guest.requests.length > 0
+                ? guest.requests.map(r => `<li>${r}</li>`).join("")
+                : "<li>No pending requests</li>"}
+            </ul>
+            <strong>Parking Info:</strong> ${guest.parkingInfo}<br>
+            <strong>Billing:</strong> ${guest.billing}
+          </td>
+        `;
 
-      // Move visually
-      pendingList.removeChild(cardElement);
-      cardElement.querySelector('button')?.remove();
-      completedList.appendChild(cardElement);
-    }
-
-    function loadGuests() {
-      guestList.innerHTML = '';
-      pendingList.innerHTML = '';
-      completedList.innerHTML = '';
-
-      if (guests.length === 0) {
-        guestList.innerHTML = '<p>No guests currently checked in.</p>';
-        return;
-      }
-
-      guests.forEach(guest => {
-        const guestRequests = requests.filter(r => r.guest === guest.name);
-        const isCompleted = completed.some(c => c.name === guest.name);
-
-        if (isCompleted) {
-          completedList.appendChild(createGuestCard(guest, 'completed'));
-        } else if (guestRequests.length > 0) {
-          pendingList.appendChild(createGuestCard(guest, 'pending'));
-        } else {
-          guestList.appendChild(createGuestCard(guest, 'normal'));
-        }
+        tableBody.appendChild(row);
+        tableBody.appendChild(detailRow);
       });
-
-      localStorage.setItem('guests', JSON.stringify(guests));
     }
 
-    loadGuests();
+    function toggleDetails(index) {
+      const detailRows = document.querySelectorAll(".details");
+      detailRows[index].style.display =
+        detailRows[index].style.display === "table-row" ? "none" : "table-row";
+    }
+
+    renderGuests();
   </script>
 </body>
 </html>
