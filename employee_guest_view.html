@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Employee Guest Management | Grand Vista Hotel</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 
   <style>
     table {
@@ -43,17 +43,16 @@
       padding: 1rem 2rem;
     }
 
-    button.view-btn {
+    .view-btn {
       background-color: #d4af37;
       color: #fff;
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
 
-    button.view-btn:hover {
+    .view-btn:hover {
       background-color: #e5c864;
     }
 
@@ -67,6 +66,7 @@
       margin-left: 0.3rem;
     }
 
+    /* Status Badges */
     .status-badge {
       display: inline-block;
       padding: 0.1rem 0.5rem;
@@ -100,19 +100,33 @@
       margin-left: 1.2rem;
     }
 
-    /* ROOM STATUS BADGES */
+    /* Room Status Badges */
     .room-status-badge {
       display: inline-block;
       padding: 0.2rem 0.6rem;
       border-radius: 999px;
       font-size: 0.8rem;
     }
-
-    .room-status-checked-in { background-color:#d4edda;color:#155724;border:1px solid #c3e6cb; }
-    .room-status-checked-out { background-color:#e2e3e5;color:#383d41;border:1px solid #d6d8db; }
-    .room-status-late-checkout { background-color:#fff3cd;color:#856404;border:1px solid #ffe58f; }
-    .room-status-no-show { background-color:#f8d7da;color:#721c24;border:1px solid #f5c6cb; }
-    .room-status-scheduled { background-color:#d1ecf1;color:#0c5460;border:1px solid #bee5eb; }
+    .room-status-Checked\ In {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .room-status-Scheduled\ Arrival {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .room-status-Late\ Checkout {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffe58f;
+    }
+    .room-status-No-Show {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
 
     /* MODAL */
     .modal {
@@ -123,7 +137,6 @@
       top: 0;
       width: 100%;
       height: 100%;
-      overflow: auto;
       background-color: rgba(0,0,0,0.4);
     }
 
@@ -137,306 +150,188 @@
       box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
     }
 
-    .modal-content h3 {
-      color: #d4af37;
-      margin-top: 0;
-    }
-
     .modal-actions {
       margin-top: 1rem;
       text-align: right;
     }
 
-    .modal-actions button {
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      margin-left: 0.5rem;
+    .menu-icon {
+      font-size: 1.2rem;
+      margin-right: 0.2rem;
     }
 
-    .btn-cancel { background-color:#e2e3e5; }
-    .btn-save { background-color:#d4af37;color:white; }
-
-    select.status-select {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #d4af37;
-      margin-top: 0.5rem;
-    }
   </style>
 </head>
 
 <body>
-  <header class="gv-header">
-    <img src="V.png" alt="Grand Vista Hotel Logo" style="height:100px; margin-bottom:1rem;">
-    <h1>Guest Management Board</h1>
-    <p>View guest details, requests, status, and stay information</p>
-  </header>
 
-  <main>
-    <h2 style="text-align:center;">Current Guests & Reservations</h2>
-    <table id="guestTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Room</th>
-          <th>Arrival</th>
-          <th>Departure</th>
-          <th>Pending Requests</th>
-          <th>In-Room Status</th>
-          <th>Key Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="guestTableBody"></tbody>
-    </table>
-  </main>
+<header class="gv-header">
+  <img src="V(1).png" class="gv-logo" alt="Logo">
+  <h1>Guest Management Board</h1>
+  <p>Employee Overview of Reservations & Requests</p>
+</header>
 
-  <footer>
-    <p>&copy; 2025 Grand Vista Hotel</p>
-  </footer>
+<main>
+  <h2 style="text-align:center;">Current Guests & Reservations</h2>
 
-  <!-- STATUS MODAL -->
-  <div id="statusModal" class="modal">
-    <div class="modal-content">
-      <h3>Change In-Room Status</h3>
-      <p id="statusGuestName"></p>
+  <table id="guestTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Room</th>
+        <th>Arrival</th>
+        <th>Departure</th>
+        <th>Requests</th>
+        <th>Status</th>
+        <th>Key</th>
+        <th>VIP/Pet/ECI</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="guestTableBody"></tbody>
+  </table>
+</main>
 
-      <label><strong>Select new status:</strong></label>
-      <select id="statusSelect" class="status-select">
-        <option value="Checked In">Checked In</option>
-        <option value="Checked Out">Checked Out</option>
-        <option value="Scheduled Arrival">Scheduled Arrival</option>
-        <option value="Late Checkout">Late Checkout</option>
-        <option value="No-Show">No-Show</option>
-      </select>
+<footer>
+  <p>&copy; 2025 Grand Vista Hotel</p>
+</footer>
 
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
-        <button class="btn-save" onclick="saveRoomStatus()">Save</button>
-      </div>
-    </div>
-  </div>
+<script>
+/* Normalizes request objects */
+function normalizeRequests(requests) {
+  if (!Array.isArray(requests)) return [];
 
-  <script>
-    /* ---------------------------
-       DO NOT OVERWRITE LOCALSTORAGE ON LOAD
-       --------------------------- */
-    let guests = JSON.parse(localStorage.getItem("guests"));
+  return requests.map(r => ({
+    text: r.text || "",
+    date: r.date || new Date().toLocaleString(),
+    status: r.status || "pending",
+    createdAt: r.createdAt || Date.now(),
+    completedAt: r.completedAt || null
+  }));
+}
 
-    if (!guests) {
-      guests = []; // empty but DO NOT SAVE over preloaded data
-    }
+/* Loads guests from storage */
+function loadGuests() {
+  let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-    /* -------- UTILITIES -------- */
-    function randomDepartureDate() {
-      const today = new Date();
-      const offset = Math.floor(Math.random() * 7) + 1;
-      const d = new Date(today);
-      d.setDate(today.getDate() + offset);
-      return d.toISOString().split("T")[0];
-    }
+  return guests.map(g => ({
+    ...g,
+    guestsInRoom: g.guestsInRoom || Math.floor(Math.random() * 4) + 1,
+    notes: g.notes || "No notes",
+    requests: normalizeRequests(g.requests)
+  }));
+}
 
-    function randomCard() {
-      const cards = ["Visa", "MasterCard", "Amex", "Discover"];
-      return {
-        type: cards[Math.floor(Math.random() * cards.length)],
-        lastFour: Math.floor(1000 + Math.random() * 9000)
-      };
-    }
+/* Status badge */
+function roomStatusBadge(status) {
+  return `<span class="room-status-badge room-status-${status.replace(" ", "\\ ")}">${status}</span>`;
+}
 
-    function normalizeGuests(data) {
-      return data.map(g => {
-        if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
-        if (!g.departureDate) g.departureDate = randomDepartureDate();
-        if (!g.keyStatus) g.keyStatus = g.key ? "Active" : "Not Issued";
-        if (!g.parkingInfo) g.parkingInfo = "Standard Parking";
-        if (!g.billing) g.billing = "Paid in Full";
-        if (!g.creditCard) g.creditCard = randomCard();
-        if (!g.requests) g.requests = [];
-        if (!g.roomStatus) g.roomStatus = "Checked In";
+/* VIP/Pet/Early icons */
+function icons(g) {
+  return `
+    ${g.vip ? "⭐" : ""}
+    ${g.hasPet ? "🐾" : ""}
+    ${g.earlyCheckInRequested ? "⏰" : ""}
+  `;
+}
 
-        g.requests = g.requests.map((r, index, arr) => {
-          const fallbackTime = Date.now() - (arr.length - index) * 1000;
-          return {
-            text: r.text || r,
-            date: r.date || new Date().toLocaleString(),
-            status: r.status || "pending",
-            createdAt: r.createdAt || fallbackTime,
-            completedAt: r.status === "completed" ? (r.completedAt || Date.now()) : null
-          };
-        });
+/* Mask function */
+function mask(str) {
+  if (!str) return "N/A";
+  return "****" + str.slice(-4);
+}
 
-        return g;
-      });
-    }
+function renderGuests() {
+  const tbody = document.getElementById("guestTableBody");
+  tbody.innerHTML = "";
 
-    guests = normalizeGuests(guests);
+  let guests = loadGuests();
 
-    const tableBody = document.getElementById("guestTableBody");
-    let activeStatusGuestIndex = null;
+  guests.forEach((g, i) => {
+    
+    const pendingCount = g.requests.filter(r => r.status === "pending").length;
 
-    function roomStatusClass(status) {
-      switch (status) {
-        case "Checked In": return "room-status-checked-in";
-        case "Checked Out": return "room-status-checked-out";
-        case "Late Checkout": return "room-status-late-checkout";
-        case "No-Show": return "room-status-no-show";
-        case "Scheduled Arrival": default:
-          return "room-status-scheduled";
-      }
-    }
+    // main row
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${g.name}</td>
+      <td>${g.room}</td>
+      <td>${g.arrivalDate}</td>
+      <td>${g.departureDate}</td>
+      <td>${pendingCount}</td>
+      <td>${roomStatusBadge(g.roomStatus)}</td>
+      <td>${g.keyStatus}</td>
+      <td style="font-size:1.3rem;">${icons(g)}</td>
+      <td><button class="view-btn" onclick="toggleDetails(${i})">View Details</button></td>
+    `;
 
-    function statusBadgeClass(status) {
-      if (status === "in-progress") return "status-in-progress";
-      if (status === "completed") return "status-completed";
-      return "status-pending";
-    }
+    // detail row
+    const detail = document.createElement("tr");
+    detail.className = "details";
 
-    function statusLabel(status) {
-      return status === "in-progress"
-        ? "In Progress"
-        : status === "completed"
-        ? "Completed"
-        : "Pending";
-    }
+    const reqList = g.requests
+      .sort((a,b) => a.createdAt - b.createdAt)
+      .map(r => `
+        <li>
+          ${r.text}
+          <span class="status-badge status-${r.status}">${r.status}</span>
+          <span class="timestamp">${r.date}</span>
+        </li>
+      `).join("");
 
-    function maskString(val) {
-      if (!val) return "N/A";
-      return "****" + String(val).slice(-3);
-    }
+    detail.innerHTML = `
+      <td colspan="9">
+        <p><strong>Guests in Room:</strong> ${g.guestsInRoom}</p>
+        <p><strong>VIP:</strong> ${g.vip ? "Yes" : "No"}</p>
+        <p><strong>Pet in Room:</strong> ${g.hasPet ? "Yes" : "No"}</p>
+        <p><strong>Early Check-In Requested:</strong> ${g.earlyCheckInRequested ? "Yes" : "No"}</p>
+        <p><strong>Notes:</strong> ${g.notes}</p>
 
-    /* -------- RENDER TABLE -------- */
-    function renderGuests() {
-      tableBody.innerHTML = "";
-      guests = normalizeGuests(JSON.parse(localStorage.getItem("guests")) || []);
+        <br>
 
-      guests.forEach((guest, i) => {
-        const pending = guest.requests.filter(r => r.status === "pending").length;
+        <strong>Passcode:</strong>
+        <span id="pass-${i}">${mask(g.passcode)}</span>
+        <button class="toggle-btn" onclick="toggleMask(${i}, 'pass')">Show</button>
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${guest.name}</td>
-          <td>${guest.room || "TBD"}</td>
-          <td>${guest.arrivalDate}</td>
-          <td>${guest.departureDate}</td>
-          <td>${pending}</td>
+        <br><br>
 
-          <td>
-            <span class="room-status-badge ${roomStatusClass(guest.roomStatus)}">
-              ${guest.roomStatus}
-            </span><br>
-            <button class="toggle-btn" onclick="openStatusModal(${i})">Change Status</button>
-          </td>
+        <strong>Digital Key:</strong>
+        <span id="key-${i}">${mask(g.key)}</span>
+        <button class="toggle-btn" onclick="toggleMask(${i}, 'key')">Show</button>
 
-          <td>${guest.keyStatus}</td>
+        <br><br>
 
-          <td><button class="view-btn" onclick="toggleDetails(${i})">View Details</button></td>
-        `;
+        <strong>Service Requests:</strong>
+        <ul>${reqList || "<li>No requests</li>"}</ul>
+      </td>
+    `;
 
-        const details = document.createElement("tr");
-        details.className = "details";
+    tbody.appendChild(row);
+    tbody.appendChild(detail);
+  });
+}
 
-        const sortedReq = [...guest.requests].sort((a,b) => a.createdAt - b.createdAt);
+function toggleDetails(i) {
+  const details = document.querySelectorAll(".details")[i];
+  details.style.display =
+    details.style.display === "table-row" ? "none" : "table-row";
+}
 
-        details.innerHTML = `
-          <td colspan="8">
-            <strong>In-Room Status:</strong> ${guest.roomStatus}<br>
-            <strong>Guests in Room:</strong> ${guest.guestsInRoom}<br>
-            <strong>VIP:</strong> ${guest.vip ? "Yes" : "No"}<br>
-            <strong>Pet in Room:</strong> ${guest.hasPet ? "Yes" : "No"}<br>
-            <strong>Early Check-In Requested:</strong> ${guest.earlyCheckInRequested ? "Yes" : "No"}<br>
-            <strong>Notes:</strong> ${guest.notes || "None"}<br><br>
+function toggleMask(i, type) {
+  const guests = loadGuests();
+  const span = document.getElementById(`${type}-${i}`);
+  const real = type === "pass" ? guests[i].passcode : guests[i].key;
 
-            <strong>Passcode:</strong>
-            <span id="pass-${i}">${maskString(guest.passcode)}</span>
-            <button class="toggle-btn" onclick="toggleMask(${i},'pass')">Show</button>
-            <br><br>
+  if (span.textContent.startsWith("****")) {
+    span.textContent = real;
+  } else {
+    span.textContent = mask(real);
+  }
+}
 
-            <strong>Digital Key:</strong>
-            <span id="key-${i}">${maskString(guest.key)}</span>
-            <button class="toggle-btn" onclick="toggleMask(${i},'key')">Show</button>
-            <br><br>
-
-            <strong>Service Requests:</strong>
-            <ul>
-              ${
-                sortedReq.length
-                  ? sortedReq.map(r => `
-                    <li>${r.text}
-                      <span class="status-badge ${statusBadgeClass(r.status)}">${statusLabel(r.status)}</span>
-                      <span class="timestamp">${r.date}</span>
-                    </li>`).join("")
-                  : "<li>No requests</li>"
-              }
-            </ul>
-            <br>
-
-            <strong>Parking Info:</strong> ${guest.parkingInfo}<br>
-            <strong>Billing:</strong> ${guest.billing}<br>
-            <strong>Card:</strong> ${guest.creditCard.type} ****${guest.creditCard.lastFour}
-          </td>
-        `;
-
-        tableBody.appendChild(row);
-        tableBody.appendChild(details);
-      });
-    }
-
-    function toggleDetails(i) {
-      const detailRows = document.querySelectorAll(".details");
-      detailRows[i].style.display =
-        detailRows[i].style.display === "table-row" ? "none" : "table-row";
-    }
-
-    function toggleMask(i, type) {
-      const span = document.getElementById(`${type}-${i}`);
-      const val = type === "pass"
-        ? guests[i].passcode
-        : guests[i].key;
-
-      span.textContent = span.textContent.startsWith("****")
-        ? val
-        : maskString(val);
-    }
-
-    /* -------- STATUS MODAL -------- */
-    function openStatusModal(i) {
-      activeStatusGuestIndex = i;
-      const g = guests[i];
-
-      document.getElementById("statusGuestName").textContent =
-        `Guest: ${g.name} (Room ${g.room})`;
-
-      document.getElementById("statusSelect").value = g.roomStatus;
-
-      document.getElementById("statusModal").style.display = "block";
-    }
-
-    function closeStatusModal() {
-      document.getElementById("statusModal").style.display = "none";
-    }
-
-    function saveRoomStatus() {
-      const newStatus = document.getElementById("statusSelect").value;
-
-      guests[activeStatusGuestIndex].roomStatus = newStatus;
-
-      localStorage.setItem("guests", JSON.stringify(guests));
-      closeStatusModal();
-      renderGuests();
-    }
-
-    window.onclick = e => {
-      if (e.target === document.getElementById("statusModal")) {
-        closeStatusModal();
-      }
-    };
-
-    renderGuests();
-  </script>
+renderGuests();
+</script>
 
 </body>
 </html>
