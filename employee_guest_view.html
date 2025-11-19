@@ -16,26 +16,32 @@
       border-radius: 8px;
       box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
     }
+
     th, td {
       border-bottom: 1px solid #e6d8a2;
       padding: 0.75rem 1rem;
       text-align: left;
     }
+
     th {
       background-color: #f9f6ed;
       color: #000;
     }
+
     tr:hover {
       background-color: #fff8dc;
     }
+
     .details {
       display: none;
       background-color: #fefcf6;
     }
+
     .details td {
       border-top: 1px solid #d4af37;
       padding: 1rem 2rem;
     }
+
     button.view-btn {
       background-color: #d4af37;
       color: #fff;
@@ -45,9 +51,11 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
+
     button.view-btn:hover {
       background-color: #e5c864;
     }
+
     .toggle-btn {
       background: none;
       border: none;
@@ -57,11 +65,67 @@
       font-size: 0.9rem;
       margin-left: 0.3rem;
     }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-left: 0.3rem;
+    }
+
+    .status-pending {
+      background-color: #fff3cd;
+      border: 1px solid #ffe58f;
+      color: #8a6d1d;
+    }
+
+    .status-in-progress {
+      background-color: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+
+    .status-completed {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
     .timestamp {
       display: block;
       font-size: 0.8rem;
       color: #777;
-      margin-left: 1rem;
+      margin-left: 1.2rem;
+    }
+
+    .status-controls {
+      margin-top: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    .status-controls button {
+      margin-right: 0.3rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-small {
+      font-size: 0.75rem;
+    }
+
+    .btn-pending {
+      background-color: #fff3cd;
+    }
+
+    .btn-in-progress {
+      background-color: #d1ecf1;
+    }
+
+    .btn-completed {
+      background-color: #d4edda;
     }
   </style>
 </head>
@@ -81,7 +145,7 @@
           <th>Room</th>
           <th>Arrival</th>
           <th>Departure</th>
-          <th>Requests</th>
+          <th>Pending Requests</th>
           <th>Key Status</th>
           <th>Actions</th>
         </tr>
@@ -95,7 +159,6 @@
   </footer>
 
   <script>
-    // Random departure for demo
     function randomDepartureDate() {
       const today = new Date();
       const offset = Math.floor(Math.random() * 7) + 1;
@@ -111,7 +174,19 @@
       return { type, lastFour };
     }
 
-    // Load guest data
+    function statusBadgeClass(status) {
+      if (status === "in-progress") return "status-in-progress";
+      if (status === "completed") return "status-completed";
+      return "status-pending";
+    }
+
+    function statusLabel(status) {
+      if (status === "in-progress") return "In Progress";
+      if (status === "completed") return "Completed";
+      return "Pending";
+    }
+
+    // Load and normalize guests
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
     guests = guests.map(g => {
@@ -123,15 +198,11 @@
       if (!g.creditCard) g.creditCard = randomCard();
       if (!g.requests) g.requests = [];
 
-      // Convert old string requests into objects
       g.requests = g.requests.map(r => {
         if (typeof r === "string") {
-          return {
-            text: r,
-            date: new Date().toLocaleString(),
-            status: "pending"
-          };
+          return { text: r, date: new Date().toLocaleString(), status: "pending" };
         }
+        if (!r.status) r.status = "pending";
         return r;
       });
 
@@ -150,7 +221,7 @@
     function renderGuests() {
       tableBody.innerHTML = "";
 
-      guests.forEach((guest, index) => {
+      guests.forEach((guest, gIndex) => {
         const pendingCount = guest.requests.filter(r => r.status === "pending").length;
 
         const row = document.createElement("tr");
@@ -161,7 +232,7 @@
           <td>${guest.departureDate}</td>
           <td>${pendingCount}</td>
           <td>${guest.keyStatus}</td>
-          <td><button class="view-btn" onclick="toggleDetails(${index})">View Details</button></td>
+          <td><button class="view-btn" onclick="toggleDetails(${gIndex})">View Details</button></td>
         `;
 
         const detailRow = document.createElement("tr");
@@ -170,20 +241,32 @@
         const requestsHTML =
           guest.requests.length > 0
             ? guest.requests
-                .map(r => `<li>${r.text}<span class="timestamp">${r.date}</span></li>`)
+                .map((r, rIndex) => `
+                  <li>
+                    ${r.text}
+                    <span class="status-badge ${statusBadgeClass(r.status)}">${statusLabel(r.status)}</span>
+                    <span class="timestamp">${r.date}</span>
+                    <div class="status-controls">
+                      <span>Update status:</span>
+                      <button class="btn-small btn-pending" onclick="updateRequestStatus(${gIndex}, ${rIndex}, 'pending')">Pending</button>
+                      <button class="btn-small btn-in-progress" onclick="updateRequestStatus(${gIndex}, ${rIndex}, 'in-progress')">In Progress</button>
+                      <button class="btn-small btn-completed" onclick="updateRequestStatus(${gIndex}, ${rIndex}, 'completed')">Completed</button>
+                    </div>
+                  </li>
+                `)
                 .join("")
-            : "<li>No pending requests</li>";
+            : "<li>No requests</li>";
 
         detailRow.innerHTML = `
           <td colspan="7">
             <strong>Passcode:</strong>
-            <span id="pass-${index}">${maskString(guest.passcode)}</span>
-            <button class="toggle-btn" onclick="toggleMask(${index}, 'pass')">Show</button>
+            <span id="pass-${gIndex}">${maskString(guest.passcode)}</span>
+            <button class="toggle-btn" onclick="toggleMask(${gIndex}, 'pass')">Show</button>
             <br><br>
 
             <strong>Digital Key:</strong>
-            <span id="key-${index}">${maskString(guest.key)}</span>
-            <button class="toggle-btn" onclick="toggleMask(${index}, 'key')">Show</button>
+            <span id="key-${gIndex}">${maskString(guest.key)}</span>
+            <button class="toggle-btn" onclick="toggleMask(${gIndex}, 'key')">Show</button>
             <br><br>
 
             <strong>Service Requests:</strong>
@@ -210,14 +293,28 @@
     function toggleMask(index, type) {
       const span = document.getElementById(`${type}-${index}`);
       const guest = guests[index];
-
       const isMasked = span.textContent.startsWith("****");
-
       if (isMasked) {
         span.textContent = type === "pass" ? guest.passcode : guest.key;
       } else {
         span.textContent = maskString(type === "pass" ? guest.passcode : guest.key);
       }
+    }
+
+    function updateRequestStatus(guestIndex, requestIndex, newStatus) {
+      guests[guestIndex].requests[requestIndex].status = newStatus;
+      localStorage.setItem("guests", JSON.stringify(guests));
+
+      // Also update currentGuest if it's the same person
+      const currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+      if (currentGuest &&
+          currentGuest.name === guests[guestIndex].name &&
+          currentGuest.passcode === guests[guestIndex].passcode) {
+        currentGuest.requests = guests[guestIndex].requests;
+        localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
+      }
+
+      renderGuests();
     }
 
     renderGuests();
