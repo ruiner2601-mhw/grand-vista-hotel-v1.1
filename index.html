@@ -1,85 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grand Vista Hotel</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 
   <style>
-    /* Prevent hyperlinks from showing blue/underlined */
-    a {
-      text-decoration: none;
-      color: inherit;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #faf7ef;
+      text-align: center;
     }
 
-    .menu-section {
-      margin-top: 1.8rem;
+    .logo {
+      height: 150px;
+      margin-top: 2rem;
     }
 
-    .menu-title {
-      font-family: 'Playfair Display', serif;
-      color: #D4AF37;
-      font-size: 1.4rem;
+    h1 {
+      color: #d4af37;
       margin-bottom: 0.5rem;
     }
 
-    .menu-button {
-      width: 90%;
-      margin: 10px auto;
+    .center-box {
+      max-width: 430px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 15px;
+      border: 2px solid #d4af37;
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+    }
+
+    .portal-btn {
       display: block;
+      width: 100%;
+      padding: 1rem;
+      margin: 1rem 0;
+      background: #d4af37;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      text-decoration: none;
+    }
+
+    .portal-btn:hover {
+      background: #e6c86d;
+      transform: scale(1.03);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- HEADER -->
-  <header class="gv-header">
-    <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
-    <h1>Grand Vista Hotel</h1>
-    <p style="color:#555; font-size:1.1rem;">Training Simulation Portal</p>
-  </header>
+  <!-- Logo + Title -->
+  <img src="V(1).png" alt="Grand Vista Hotel Logo" class="logo" />
+  <h1>Grand Vista Hotel</h1>
+  <p>Welcome to the Digital Guest Experience</p>
 
-  <!-- MAIN CARD -->
-  <div class="page-box" style="max-width: 480px; text-align:center; margin-top:2.5rem;">
-
-    <!-- GUEST SECTION -->
-    <div class="menu-section">
-      <h2 class="menu-title">Guest Services</h2>
-
-      <a href="guest_checkin.html">
-        <button class="btn menu-button">Guest Check-In</button>
-      </a>
-
-      <a href="guest_dashboard.html">
-        <button class="btn menu-button">Guest Dashboard</button>
-      </a>
-    </div>
-
-    <!-- EMPLOYEE SECTION -->
-    <div class="menu-section">
-      <h2 class="menu-title">Employee Access</h2>
-
-      <a href="employee_login.html">
-        <button class="btn menu-button">Employee Login</button>
-      </a>
-    </div>
-
-    <!-- TEAM SECTION -->
-    <div class="menu-section">
-      <h2 class="menu-title">Training Management</h2>
-
-      <a href="team_login.html">
-        <button class="btn menu-button">Team Login</button>
-      </a>
-    </div>
-
+  <!-- Main Box -->
+  <div class="center-box">
+    <a href="guest_checkin.html" class="portal-btn">Guest Check-In</a>
+    <a href="employee_login.html" class="portal-btn">Employee Login</a>
+    <a href="team_login.html" class="portal-btn">Project Team Login</a>
   </div>
 
   <footer>
-    <p>&copy; 2025 Grand Vista Hotel — Training Simulation</p>
+    <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
+
+  <!-- Load reservation seeding file -->
+  <script src="reservations.js"></script>
+
+  <!-- Auto-load 5 sample guests for new users -->
+  <script>
+    if (!localStorage.getItem("guests")) {
+      try {
+        seedSampleReservations();
+        console.log("Sample guest data loaded for first-time visitor.");
+      } catch (e) {
+        console.error("Error loading sample data:", e);
+      }
+    }
+  </script>
 
 </body>
 </html>
