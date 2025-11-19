@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     .dashboard-card {
-      max-width: 600px;
+      max-width: 700px;
       background-color: #fff;
       color: #000;
       margin: 2rem auto;
@@ -16,10 +16,17 @@
       border-radius: 10px;
       box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
     }
+
     .dashboard-card h2 {
       color: #d4af37;
       text-align: center;
       margin-bottom: 1rem;
+    }
+
+    .section-title {
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
     }
 
     select, textarea {
@@ -38,6 +45,7 @@
       list-style: none;
       padding-left: 0;
     }
+
     ul li {
       background: #fff8dc;
       border: 1px solid #d4af37;
@@ -52,6 +60,45 @@
       font-size: 0.8rem;
       color: #777;
       margin-top: 0.2rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-left: 0.3rem;
+    }
+
+    .status-pending {
+      background-color: #fff3cd;
+      border: 1px solid #ffe58f;
+      color: #8a6d1d;
+    }
+
+    .status-in-progress {
+      background-color: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+
+    .status-completed {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .info-box {
+      background: #f9f6ed;
+      border: 1px solid #e6d8a2;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .info-box p {
+      margin: 0.2rem 0;
     }
   </style>
 </head>
@@ -74,16 +121,30 @@
 
       <hr>
 
-      <h3>Room Service Requests</h3>
+      <!-- HOTEL INFO PANEL -->
+      <h3 class="section-title">Hotel Information</h3>
+      <div class="info-box">
+        <p><strong>Wi-Fi Network:</strong> GrandVista_Guest</p>
+        <p><strong>Wi-Fi Password:</strong> STAYLUXE2025</p>
+        <p><strong>Check-In:</strong> 3:00 PM</p>
+        <p><strong>Check-Out:</strong> 11:00 AM</p>
+        <p><strong>Restaurant Hours:</strong> 6:30 AM – 10:00 PM</p>
+        <p><strong>Spa Hours:</strong> 9:00 AM – 8:00 PM</p>
+      </div>
 
-      <!-- NEW: Dropdown Menu -->
-      <label for="requestDropdown"><strong>Select a Request:</strong></label>
+      <hr>
+
+      <!-- ROOM SERVICE & REQUESTS -->
+      <h3 class="section-title">Room Service & Requests</h3>
+
+      <!-- Quick Request Dropdown -->
+      <label for="requestDropdown"><strong>Quick Request:</strong></label>
       <select id="requestDropdown" onchange="toggleOtherBox()">
         <option value="">-- Select a request --</option>
         <option value="Extra Towels">Extra Towels</option>
         <option value="Extra Pillows">Extra Pillows</option>
         <option value="Blankets">Blankets</option>
-        <option value="Toiletries (Shampoo/Soap)">Toiletries</option>
+        <option value="Toiletries (Shampoo/Soap)">Toiletries (Shampoo/Soap)</option>
         <option value="In-room Dining Pickup">In-room Dining Pickup</option>
         <option value="Wake Up Call">Wake Up Call</option>
         <option value="Room Cleaning Service">Room Cleaning Service</option>
@@ -92,17 +153,49 @@
         <option value="Other">Other (Write Below)</option>
       </select>
 
-      <!-- NEW: Custom Request Field -->
-      <textarea 
-        id="otherRequestBox" 
-        placeholder="Describe your request..." 
+      <textarea
+        id="otherRequestBox"
+        placeholder="Describe your request..."
         style="display:none; margin-top:0.7rem;">
       </textarea>
 
       <button onclick="addServiceRequest()">Submit Request</button>
 
-      <h4>Pending Requests (Newest First):</h4>
+      <!-- Housekeeping Scheduling -->
+      <h3 class="section-title">Housekeeping Scheduling</h3>
+      <label for="housekeepingDropdown"><strong>Housekeeping Options:</strong></label>
+      <select id="housekeepingDropdown">
+        <option value="">-- Select an option --</option>
+        <option value="Housekeeping - Clean Now">Clean My Room Now</option>
+        <option value="Housekeeping - Later Today">Clean Later Today</option>
+        <option value="Housekeeping - Tomorrow Morning">Clean Tomorrow Morning</option>
+        <option value="Do Not Disturb">Do Not Disturb</option>
+        <option value="Turn-down Service Tonight">Turn-down Service Tonight</option>
+      </select>
+      <button onclick="addHousekeepingRequest()">Submit Housekeeping Request</button>
+
+      <!-- Extra Amenities -->
+      <h3 class="section-title">Extra Amenities</h3>
+      <label for="amenityDropdown"><strong>Request Amenities:</strong></label>
+      <select id="amenityDropdown">
+        <option value="">-- Select an amenity --</option>
+        <option value="Amenity - Bathrobe">Bathrobe</option>
+        <option value="Amenity - Slippers">Slippers</option>
+        <option value="Amenity - Toothbrush Kit">Toothbrush Kit</option>
+        <option value="Amenity - Hair Dryer">Hair Dryer</option>
+        <option value="Amenity - Baby Crib">Baby Crib</option>
+        <option value="Amenity - Rollaway Bed">Rollaway Bed</option>
+        <option value="Amenity - Minibar Restock">Minibar Restock</option>
+      </select>
+      <button onclick="addAmenityRequest()">Submit Amenity Request</button>
+
+      <!-- Requests List -->
+      <h3 class="section-title">Pending & Recent Requests (Newest First)</h3>
       <ul id="requestList"></ul>
+
+      <!-- Notifications / Updates -->
+      <h3 class="section-title">Updates from Staff</h3>
+      <ul id="notificationList"></ul>
     </section>
   </main>
 
@@ -111,7 +204,6 @@
   </footer>
 
   <script>
-    // Helper random date
     function randomDepartureDate() {
       const today = new Date();
       const offset = Math.floor(Math.random() * 7) + 1;
@@ -120,7 +212,7 @@
       return dep.toISOString().split("T")[0];
     }
 
-    // Load guest
+    // Load current guest
     let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
     if (!currentGuest) {
       alert("No guest found. Please check in first.");
@@ -131,15 +223,16 @@
     if (!currentGuest.departureDate) currentGuest.departureDate = randomDepartureDate();
     if (!currentGuest.requests) currentGuest.requests = [];
 
-    // Fix old requests
+    // Fix old requests (string -> object with status)
     currentGuest.requests = currentGuest.requests.map(r => {
       if (typeof r === "string") {
         return { text: r, date: new Date().toLocaleString(), status: "pending" };
       }
+      if (!r.status) r.status = "pending";
       return r;
     });
 
-    // Sync to master guest list
+    // Sync with master guests list
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
     const gIndex = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
     if (gIndex !== -1) guests[gIndex] = currentGuest;
@@ -147,21 +240,19 @@
     localStorage.setItem("guests", JSON.stringify(guests));
     localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
 
-    // Display info
+    // Display guest info
     document.getElementById("guestNameHeader").textContent =
       currentGuest.name ? `Welcome, ${currentGuest.name}` : "Welcome, Guest";
-
     document.getElementById("roomNumber").textContent = currentGuest.room;
     document.getElementById("guestCount").textContent = currentGuest.guestsInRoom || "N/A";
     document.getElementById("arrivalDate").textContent = currentGuest.arrivalDate;
     document.getElementById("departureDate").textContent = currentGuest.departureDate;
     document.getElementById("digitalKey").textContent = currentGuest.key;
 
-    // Show/hide Other box
+    // Show/hide "Other" box
     function toggleOtherBox() {
       const dropdown = document.getElementById("requestDropdown");
       const otherBox = document.getElementById("otherRequestBox");
-
       if (dropdown.value === "Other") {
         otherBox.style.display = "block";
       } else {
@@ -170,74 +261,160 @@
       }
     }
 
-    // Render requests
-    function renderRequests() {
-      const list = document.getElementById("requestList");
-      currentGuest = JSON.parse(localStorage.getItem("currentGuest")) || currentGuest;
-
-      list.innerHTML = "";
-
-      if (!currentGuest.requests || currentGuest.requests.length === 0) {
-        list.innerHTML = "<li>No pending requests</li>";
-        return;
-      }
-
-      const sorted = [...currentGuest.requests].reverse();
-      sorted.forEach(req => {
-        const text = req.text || "Unknown request";
-        const date = req.date || "Date not available";
-        const li = document.createElement("li");
-        li.innerHTML = `${text}<span class="timestamp">${date}</span>`;
-        list.appendChild(li);
-      });
+    // Helpers for creating requests
+    function createRequest(text) {
+      const now = new Date();
+      return { text, date: now.toLocaleString(), status: "pending" };
     }
 
-    // Add request
+    function saveCurrentGuest() {
+      let guests = JSON.parse(localStorage.getItem("guests")) || [];
+      const idx = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
+      if (idx !== -1) {
+        guests[idx] = currentGuest;
+      } else {
+        guests.push(currentGuest);
+      }
+      localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
+      localStorage.setItem("guests", JSON.stringify(guests));
+    }
+
+    // Add main room service request
     function addServiceRequest() {
       const dropdown = document.getElementById("requestDropdown");
       const otherBox = document.getElementById("otherRequestBox");
 
       let requestText = dropdown.value;
-
-      if (!requestText) return alert("Please select a service request.");
+      if (!requestText) {
+        alert("Please select a service request.");
+        return;
+      }
 
       if (requestText === "Other") {
-        if (!otherBox.value.trim()) return alert("Please describe your request.");
+        if (!otherBox.value.trim()) {
+          alert("Please describe your request.");
+          return;
+        }
         requestText = otherBox.value.trim();
       }
 
-      const now = new Date();
-      const newRequest = { text: requestText, date: now.toLocaleString(), status: "pending" };
-
-      let guests = JSON.parse(localStorage.getItem("guests")) || [];
-
+      const newRequest = createRequest(requestText);
       currentGuest.requests.push(newRequest);
-
-      const idx = guests.findIndex(g => g.name === currentGuest.name && g.passcode === currentGuest.passcode);
-      if (idx !== -1) {
-        guests[idx].requests.push(newRequest);
-      }
-
-      localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
-      localStorage.setItem("guests", JSON.stringify(guests));
+      saveCurrentGuest();
 
       dropdown.value = "";
       otherBox.style.display = "none";
       otherBox.value = "";
 
-      renderRequests();
+      renderRequestsAndNotifications();
     }
 
-    // Auto-refresh every 2s
+    // Housekeeping
+    function addHousekeepingRequest() {
+      const dropdown = document.getElementById("housekeepingDropdown");
+      const val = dropdown.value;
+      if (!val) {
+        alert("Please select a housekeeping option.");
+        return;
+      }
+      const newRequest = createRequest(val);
+      currentGuest.requests.push(newRequest);
+      saveCurrentGuest();
+
+      dropdown.value = "";
+      renderRequestsAndNotifications();
+    }
+
+    // Amenities
+    function addAmenityRequest() {
+      const dropdown = document.getElementById("amenityDropdown");
+      const val = dropdown.value;
+      if (!val) {
+        alert("Please select an amenity.");
+        return;
+      }
+      const label = val.replace("Amenity - ", "Amenity: ");
+      const newRequest = createRequest(label);
+      currentGuest.requests.push(newRequest);
+      saveCurrentGuest();
+
+      dropdown.value = "";
+      renderRequestsAndNotifications();
+    }
+
+    function statusBadgeClass(status) {
+      if (status === "in-progress") return "status-in-progress";
+      if (status === "completed") return "status-completed";
+      return "status-pending";
+    }
+
+    function statusLabel(status) {
+      if (status === "in-progress") return "In Progress";
+      if (status === "completed") return "Completed";
+      return "Pending";
+    }
+
+    // Render requests and notifications
+    function renderRequestsAndNotifications() {
+      const requestList = document.getElementById("requestList");
+      const notificationList = document.getElementById("notificationList");
+
+      currentGuest = JSON.parse(localStorage.getItem("currentGuest")) || currentGuest;
+      if (!currentGuest.requests) currentGuest.requests = [];
+
+      requestList.innerHTML = "";
+      notificationList.innerHTML = "";
+
+      if (currentGuest.requests.length === 0) {
+        requestList.innerHTML = "<li>No pending requests</li>";
+        notificationList.innerHTML = "<li>No updates yet</li>";
+        return;
+      }
+
+      const sorted = [...currentGuest.requests].slice().reverse();
+
+      sorted.forEach(req => {
+        const text = req.text || "Unknown request";
+        const date = req.date || "Date not available";
+        const status = req.status || "pending";
+
+        // Main request list
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${text}
+          <span class="status-badge ${statusBadgeClass(status)}">${statusLabel(status)}</span>
+          <span class="timestamp">${date}</span>
+        `;
+        requestList.appendChild(li);
+
+        // Notifications: only show non-pending as "updates"
+        if (status === "in-progress" || status === "completed") {
+          const nli = document.createElement("li");
+          nli.innerHTML = `
+            Your request "<strong>${text}</strong>" is now
+            <span class="status-badge ${statusBadgeClass(status)}">${statusLabel(status)}</span>
+            <span class="timestamp">${date}</span>
+          `;
+          notificationList.appendChild(nli);
+        }
+      });
+
+      if (notificationList.children.length === 0) {
+        notificationList.innerHTML = "<li>No updates yet</li>";
+      }
+    }
+
+    // Auto-refresh from localStorage every 2s
     setInterval(() => {
       const updatedGuest = JSON.parse(localStorage.getItem("currentGuest"));
+      if (!updatedGuest) return;
       if (JSON.stringify(updatedGuest.requests) !== JSON.stringify(currentGuest.requests)) {
         currentGuest = updatedGuest;
-        renderRequests();
+        renderRequestsAndNotifications();
       }
     }, 2000);
 
-    renderRequests();
+    renderRequestsAndNotifications();
   </script>
 </body>
 </html>
