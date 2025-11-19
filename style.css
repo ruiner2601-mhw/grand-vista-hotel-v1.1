@@ -1,138 +1,211 @@
-/* =======================================
-   Grand Vista Hotel - White & Gold Theme
-   ======================================= */
+/* ================================
+   GRAND VISTA HOTEL - ULTRA LUXURY THEME
+   White + Gold Premium Aesthetic
+   ================================ */
 
-:root {
-  --primary: #fff;
-  --secondary: #000;
-  --accent: #d4af37; /* gold */
-  --background: #f8f8f8;
-  --card-bg: #ffffff;
-  --muted: #555;
-  --error: #b00020;
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* GLOBAL RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ---------- GLOBAL ---------- */
 body {
-  margin: 0;
-  font-family: "Georgia", serif;
-  background-color: var(--background);
-  color: var(--secondary);
+  background: #FAF8F2; /* soft ivory */
+  color: #444;
+  font-family: 'Inter', sans-serif;
   line-height: 1.6;
 }
 
-h1, h2, h3, h4 {
-  color: var(--secondary);
-  text-align: center;
-  margin-top: 0;
+/* HEADERS */
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37; /* luxury gold */
+  letter-spacing: 0.5px;
 }
 
-a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* ---------- HEADER ---------- */
 .gv-header {
-  background-color: var(--primary);
-  border-bottom: 3px solid var(--accent);
   text-align: center;
   padding: 2rem 1rem;
+  background: white;
+  border-bottom: 2px solid #E8D7A9;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.15);
 }
 
-.gv-header h1 {
-  font-family: "Playfair Display", serif;
+/* LOGO */
+.gv-header img {
+  filter: drop-shadow(0 0 8px rgba(212,175,55,0.4));
+}
+
+/* UNIVERSAL BUTTON DESIGN */
+button,
+.btn {
+  background: linear-gradient(135deg, #D4AF37, #B8860B);
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0px 3px 10px rgba(212,175,55,0.3);
+}
+
+button:hover,
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 16px rgba(212,175,55,0.45);
+}
+
+/* INLINE TOGGLE BUTTON */
+.toggle-btn {
+  background: none;
+  color: #B8860B;
+  border: none;
+  cursor: pointer;
   font-weight: 600;
-  letter-spacing: 1px;
+  margin-left: 6px;
+  font-size: 0.9rem;
+}
+.toggle-btn:hover {
+  color: #D4AF37;
 }
 
-.gv-header p {
-  color: var(--muted);
-  margin-top: 0.5rem;
-  font-style: italic;
+/* INPUT FIELDS */
+input, select, textarea {
+  width: 95%;
+  padding: 10px;
+  margin: 0.6rem auto;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #D4AF37;
+  background: #fff;
+  display: block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
-/* ---------- HOME LINKS ---------- */
-.home-links {
-  text-align: center;
-  padding: 2rem;
-}
-
-.home-links ul {
-  list-style: none;
-  padding: 0;
-}
-
-.home-links li {
-  margin: 1rem 0;
-}
-
-.home-links a {
-  font-size: 1.2rem;
-  color: var(--secondary);
-  border-bottom: 2px solid transparent;
-  transition: color 0.3s, border-color 0.3s;
-}
-
-.home-links a:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-/* ---------- FORM CONTAINER ---------- */
-.form-container {
-  max-width: 420px;
-  background-color: var(--card-bg);
-  border: 2px solid var(--accent);
-  border-radius: 10px;
+/* PRIMARY FORM CONTAINERS */
+.form-container,
+.page-box,
+.container-box {
+  background: #FFFFFF;
+  max-width: 500px;
   margin: 2rem auto;
   padding: 2rem;
+  border-radius: 12px;
+  border: 2px solid #E8D7A9;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+}
+
+/* TABLES (Employee Dashboard) */
+table {
+  width: 95%;
+  margin: 2rem auto;
+  border-collapse: collapse;
+  background: white;
+  border: 2px solid #D4AF37;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(212,175,55,0.25);
+}
+
+th {
+  padding: 12px;
+  background: #FDF8EC; /* champagne */
+  border-bottom: 2px solid #E8D7A9;
+  text-align: left;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid #F0E5C6;
+}
+
+tr:hover {
+  background: #FFF8DC;
+}
+
+/* EXPANDED “DETAILS” ROW */
+.details {
+  background: #FFFDF7;
+}
+.details td {
+  border-top: 2px solid #E8D7A9;
+  padding: 1.5rem;
+}
+
+/* BADGES */
+.status-badge,
+.room-status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #FFF3CD;
+  color: #8A6D1D;
+}
+
+.status-in-progress {
+  background: #D1ECF1;
+  color: #0C5460;
+}
+
+.status-completed {
+  background: #D4EDDA;
+  color: #155724;
+}
+
+.room-status-checked-in {
+  background: #D4EDDA;
+  color: #155724;
+}
+
+.room-status-checked-out {
+  background: #E2E3E5;
+  color: #383D41;
+}
+
+.room-status-late-checkout {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.room-status-no-show {
+  background: #F8D7DA;
+  color: #721C24;
+}
+
+.room-status-scheduled {
+  background: #D1ECF1;
+  color: #0C5460;
+}
+
+/* GUEST DASHBOARD PANEL */
+.guest-dashboard-box {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid #E8D7A9;
+  box-shadow: 0 0 12px rgba(212,175,55,0.25);
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* FOOTER */
+footer {
   text-align: center;
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+  padding: 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
 }
-
-input, button, textarea, select {
-  width: 100%;
-  padding: 0.8rem;
-  margin: 0.6rem 0;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--accent);
-  background-color: var(--primary);
-  color: var(--secondary);
-  font-family: inherit;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-button {
-  background-color: var(--accent);
-  color: var(--primary);
-  font-weight: bold;
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-button:hover {
-  background-color: #e5c864;
-  transform: translateY(-1px);
-}
-
-/* ---------- MESSAGES ---------- */
-.error {
-  color: var(--error);
-}
-
-.muted {
-  color: var(--muted);
-  f
