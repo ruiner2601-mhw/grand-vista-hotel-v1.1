@@ -57,11 +57,6 @@
       font-size: 0.9rem;
       margin-left: 0.3rem;
     }
-    .inline {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
     .timestamp {
       display: block;
       font-size: 0.8rem;
@@ -116,25 +111,33 @@
       return { type, lastFour };
     }
 
-    // Load and enrich guest data
+    // Load guest data
     let guests = JSON.parse(localStorage.getItem("guests")) || [];
+
     guests = guests.map(g => {
       if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
       if (!g.departureDate) g.departureDate = randomDepartureDate();
       if (!g.keyStatus) g.keyStatus = "Active";
       if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
       if (!g.billing) g.billing = "Paid in Full";
-      if (!g.requests) g.requests = [];
       if (!g.creditCard) g.creditCard = randomCard();
+      if (!g.requests) g.requests = [];
+
       // Convert old string requests into objects
       g.requests = g.requests.map(r => {
         if (typeof r === "string") {
-          return { text: r, date: new Date().toLocaleString(), status: "pending" };
+          return {
+            text: r,
+            date: new Date().toLocaleString(),
+            status: "pending"
+          };
         }
         return r;
       });
+
       return g;
     });
+
     localStorage.setItem("guests", JSON.stringify(guests));
 
     const tableBody = document.getElementById("guestTableBody");
@@ -146,8 +149,10 @@
 
     function renderGuests() {
       tableBody.innerHTML = "";
+
       guests.forEach((guest, index) => {
         const pendingCount = guest.requests.filter(r => r.status === "pending").length;
+
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${guest.name}</td>
@@ -161,32 +166,36 @@
 
         const detailRow = document.createElement("tr");
         detailRow.className = "details";
-        const requestsHTML = guest.requests.length
-          ? guest.requests
-              .map(r => `<li>${r.text}<span class="timestamp">${r.date}</span></li>`)
-              .join("")
-          : "<li>No pending requests</li>";
+
+        const requestsHTML =
+          guest.requests.length > 0
+            ? guest.requests
+                .map(r => `<li>${r.text}<span class="timestamp">${r.date}</span></li>`)
+                .join("")
+            : "<li>No pending requests</li>";
 
         detailRow.innerHTML = `
           <td colspan="7">
-            <div class="inline"><strong>Passcode:</strong>
-              <span id="pass-${index}" class="masked">${maskString(guest.passcode)}</span>
-              <button class="toggle-btn" onclick="toggleMask(${index}, 'pass')">Show</button>
-            </div><br><br>
+            <strong>Passcode:</strong>
+            <span id="pass-${index}">${maskString(guest.passcode)}</span>
+            <button class="toggle-btn" onclick="toggleMask(${index}, 'pass')">Show</button>
+            <br><br>
 
-            <div class="inline"><strong>Digital Key:</strong>
-              <span id="key-${index}" class="masked">${maskString(guest.key)}</span>
-              <button class="toggle-btn" onclick="toggleMask(${index}, 'key')">Show</button>
-            </div><br><br>
+            <strong>Digital Key:</strong>
+            <span id="key-${index}">${maskString(guest.key)}</span>
+            <button class="toggle-btn" onclick="toggleMask(${index}, 'key')">Show</button>
+            <br><br>
 
             <strong>Service Requests:</strong>
             <ul>${requestsHTML}</ul>
+            <br>
 
             <strong>Parking Info:</strong> ${guest.parkingInfo}<br>
             <strong>Billing:</strong> ${guest.billing}<br>
             <strong>Credit Card:</strong> ${guest.creditCard.type} ****${guest.creditCard.lastFour}
           </td>
         `;
+
         tableBody.appendChild(row);
         tableBody.appendChild(detailRow);
       });
@@ -201,7 +210,9 @@
     function toggleMask(index, type) {
       const span = document.getElementById(`${type}-${index}`);
       const guest = guests[index];
+
       const isMasked = span.textContent.startsWith("****");
+
       if (isMasked) {
         span.textContent = type === "pass" ? guest.passcode : guest.key;
       } else {
