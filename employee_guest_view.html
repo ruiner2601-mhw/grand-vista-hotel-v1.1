@@ -186,29 +186,41 @@
       return "Pending";
     }
 
-    // Load and normalize guests
-    let guests = JSON.parse(localStorage.getItem("guests")) || [];
+    function normalizeGuests(data) {
+      return data.map(g => {
+        if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
+        if (!g.departureDate) g.departureDate = randomDepartureDate();
+        if (!g.keyStatus) g.keyStatus = "Active";
+        if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
+        if (!g.billing) g.billing = "Paid in Full";
+        if (!g.creditCard) g.creditCard = randomCard();
+        if (!g.requests) g.requests = [];
 
-    guests = guests.map(g => {
-      if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
-      if (!g.departureDate) g.departureDate = randomDepartureDate();
-      if (!g.keyStatus) g.keyStatus = "Active";
-      if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
-      if (!g.billing) g.billing = "Paid in Full";
-      if (!g.creditCard) g.creditCard = randomCard();
-      if (!g.requests) g.requests = [];
+        g.requests = g.requests.map((r, index, arr) => {
+          const baseCreated = Date.now() - (arr.length - index) * 1000;
+          if (typeof r === "string") {
+            return {
+              text: r,
+              date: new Date().toLocaleString(),
+              status: "pending",
+              createdAt: baseCreated,
+              completedAt: null
+            };
+          }
+          if (!r.text) r.text = "Unknown request";
+          if (!r.date) r.date = new Date().toLocaleString();
+          if (!r.status) r.status = "pending";
+          if (!r.createdAt) r.createdAt = baseCreated;
+          if (r.status !== "completed") r.completedAt = null;
+          return r;
+        });
 
-      g.requests = g.requests.map(r => {
-        if (typeof r === "string") {
-          return { text: r, date: new Date().toLocaleString(), status: "pending" };
-        }
-        if (!r.status) r.status = "pending";
-        return r;
+        return g;
       });
+    }
 
-      return g;
-    });
-
+    let guests = JSON.parse(localStorage.getItem("guests")) || [];
+    guests = normalizeGuests(guests);
     localStorage.setItem("guests", JSON.stringify(guests));
 
     const tableBody = document.getElementById("guestTableBody");
@@ -220,6 +232,8 @@
 
     function renderGuests() {
       tableBody.innerHTML = "";
+      guests = JSON.parse(localStorage.getItem("guests")) || [];
+      guests = normalizeGuests(guests);
 
       guests.forEach((guest, gIndex) => {
         const pendingCount = guest.requests.filter(r => r.status === "pending").length;
@@ -238,20 +252,17 @@
         const detailRow = document.createElement("tr");
         detailRow.className = "details";
 
+        // Sort requests by createdAt ascending for detail view
+        const sortedReqs = [...guest.requests].sort((a, b) => a.createdAt - b.createdAt);
+
         const requestsHTML =
-          guest.requests.length > 0
-            ? guest.requests
-                .map((r, rIndex) => `
+          sortedReqs.length > 0
+            ? sortedReqs
+                .map(r => `
                   <li>
                     ${r.text}
                     <span class="status-badge ${statusBadgeClass(r.status)}">${statusLabel(r.status)}</span>
                     <span class="timestamp">${r.date}</span>
-                    <div class="status-controls">
-                      <span>Update status:</span>
-                      <button class="btn-small btn-pending" onclick="updateRequestStatus(${gIndex}, ${rIndex}, 'pending')">Pending</button>
-                      <button class="btn-small btn-in-progress" onclick="updateRequestStatus(${gIndex}, ${rIndex}, 'in-progress')">In Progress</button>
-                      <button class="btn-small btn-completed" onclick="updateRequestStatus(${gIndex}, ${rIndex}, 'completed')">Completed</button>
-                    </div>
                   </li>
                 `)
                 .join("")
@@ -299,22 +310,6 @@
       } else {
         span.textContent = maskString(type === "pass" ? guest.passcode : guest.key);
       }
-    }
-
-    function updateRequestStatus(guestIndex, requestIndex, newStatus) {
-      guests[guestIndex].requests[requestIndex].status = newStatus;
-      localStorage.setItem("guests", JSON.stringify(guests));
-
-      // Also update currentGuest if it's the same person
-      const currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
-      if (currentGuest &&
-          currentGuest.name === guests[guestIndex].name &&
-          currentGuest.passcode === guests[guestIndex].passcode) {
-        currentGuest.requests = guests[guestIndex].requests;
-        localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
-      }
-
-      renderGuests();
     }
 
     renderGuests();
