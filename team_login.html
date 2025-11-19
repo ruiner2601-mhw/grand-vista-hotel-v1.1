@@ -6,7 +6,7 @@
   <title>Team Login – Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Load sample reservations -->
+  <!-- Load sample reservation generator -->
   <script src="reservations.js"></script>
 
   <style>
@@ -77,7 +77,7 @@
     <h1>Team Login</h1>
     <p>Authorized Users Only</p>
 
-    <!-- Login inputs -->
+    <!-- Login form -->
     <input type="text" id="username" placeholder="Enter username">
     <input type="password" id="password" placeholder="Enter password">
     <button onclick="teamLogin()">Login</button>
@@ -110,22 +110,22 @@
 
   function resetSimulation() {
     const confirmReset = confirm(
-      "⚠️ This will DELETE ALL data and reload 5 sample reservations.\n\nContinue?"
+      "⚠️ This will DELETE ALL hotel data and reload 5 sample reservations.\n\nContinue?"
     );
     if (!confirmReset) return;
 
-    // 1. Clear all data
+    // Clear all hotel data
     localStorage.clear();
 
-    // 2. Load sample guests (from reservations.js)
+    // Load sample reservations
     if (typeof seedSampleReservations === "function") {
       seedSampleReservations();
       alert("Hotel reset complete.\n\n5 sample reservations loaded!");
     } else {
-      alert("Error: reservations.js not loaded!");
+      alert("ERROR: reservations.js could not be loaded.\nCheck the file path.");
     }
 
-    // 3. Reload the page
+    // Reload page so UI updates
     location.reload();
   }
 </script>
