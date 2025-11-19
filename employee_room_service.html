@@ -91,7 +91,7 @@
       color: #155724;
     }
 
-    .undo-btn {
+    .action-btn {
       margin-top: 8px;
       width: 100%;
       padding: 6px;
@@ -102,7 +102,7 @@
       font-size: 0.9rem;
     }
 
-    .undo-btn:hover {
+    .action-btn:hover {
       background: #ffe9a9;
     }
   </style>
@@ -160,21 +160,33 @@ function loadRequests() {
         <p><em>Guest:</em> ${guest.name} (Room ${guest.room})</p>
       `;
 
-      // ADD UNDO BUTTONS BASED ON STATUS
-      if (req.status === "completed") {
+      // FORWARD + BACKWARD MOVEMENT BUTTONS
+
+      // --- Pending column ---
+      if (req.status === "pending") {
         card.innerHTML += `
-          <button class="undo-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'in-progress')">⬅ Move to In Progress</button>
-          <button class="undo-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'pending')">⬅ Move to Pending</button>
+          <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'in-progress')">➡ Move to In Progress</button>
+          <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'completed')">✔ Mark Completed</button>
         `;
       }
 
+      // --- In progress column ---
       if (req.status === "in-progress") {
         card.innerHTML += `
-          <button class="undo-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'pending')">⬅ Move to Pending</button>
+          <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'completed')">✔ Mark Completed</button>
+          <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'pending')">⬅ Move to Pending</button>
         `;
       }
 
-      // ADD TO THE CORRECT COLUMN
+      // --- Completed column ---
+      if (req.status === "completed") {
+        card.innerHTML += `
+          <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'in-progress')">⬅ Move to In Progress</button>
+          <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'pending')">⬅ Move to Pending</button>
+        `;
+      }
+
+      // Place card in correct column
       if (req.status === "pending") pendingCol.appendChild(card);
       else if (req.status === "in-progress") inProgressCol.appendChild(card);
       else completedCol.appendChild(card);
