@@ -1,58 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guest Check-In – Grand Vista Hotel</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guest Check-In | Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    a { text-decoration: none; color: inherit; }
+    .checkin-box {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      border: 2px solid #E8D7A9;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
+
   <header class="gv-header">
+    <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
     <h1>Guest Check-In</h1>
+    <p>Please enter your information below</p>
   </header>
 
-  <main class="form-container">
-    <form id="checkinForm">
-      <input type="text" id="guestName" placeholder="Full Name" required />
-      <input type="text" id="guestPasscode" placeholder="Create a Passcode" required />
-      <button type="submit">Check In</button>
-    </form>
-    <p id="successMsg"></p>
-  </main>
+  <div class="checkin-box">
+    <input type="text" id="guestName" placeholder="Enter your full name">
+    <input type="password" id="guestPasscode" placeholder="Enter a 4-digit passcode">
+    <button class="btn" onclick="checkInGuest()">Complete Check-In</button>
+  </div>
 
-  <script>
-    const form = document.getElementById('checkinForm');
-    const msg = document.getElementById('successMsg');
+  <footer>
+    <p>&copy; 2025 Grand Vista Hotel</p>
+  </footer>
 
-    function generateRoomNumber(existingGuests) {
-      let room = 101;
-      const usedRooms = existingGuests.map(g => Number(g.room));
-      while (usedRooms.includes(room)) room++;
-      return room;
-    }
+<script>
+/* -----------------------------
+   RANDOMIZATION FUNCTIONS
+------------------------------ */
 
-    function generateKey() {
-      const digits = Math.floor(10000 + Math.random() * 90000);
-      return `GVH-${digits}`;
-    }
+// Random room number 1–200
+function generateRandomRoom() {
+  return Math.floor(Math.random() * 200) + 1;
+}
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const name = guestName.value.trim();
-      const pass = guestPasscode.value.trim();
-      if (!name || !pass) return;
+// random true/false
+function randomBool() {
+  return Math.random() < 0.5;
+}
 
-      const guests = JSON.parse(localStorage.getItem('guests') || '[]');
-      const room = generateRoomNumber(guests);
-      const key = generateKey();
+// random hotel-style notes
+function randomNote() {
+  const notes = [
+    "Prefers high floor",
+    "Traveling with family",
+    "Requests extra towels",
+    "Allergic to feathers",
+    "Celebrating anniversary",
+    "Celebrating birthday",
+    "Needs ADA accessible room",
+    "Requests quiet room",
+    "Late arrival expected",
+    "Early arrival expected",
+    "Prefers extra pillows",
+    "Requests hypoallergenic bedding",
+    "Enjoys pool view rooms"
+  ];
+  return notes[Math.floor(Math.random() * notes.length)];
+}
 
-      const newGuest = { name, passcode: pass, room, key };
-      guests.push(newGuest);
-      localStorage.setItem('guests', JSON.stringify(guests));
-      localStorage.setItem('currentGuest', JSON.stringify(newGuest));
+/* -----------------------------
+   MAIN CHECK-IN FUNCTION
+------------------------------ */
 
-      window.location.href = 'guest_dashboard.html';
-    });
-  </script>
+function checkInGuest() {
+  const name = document.getElementById("guestName").value.trim();
+  const passcode = document.getElementById("guestPasscode").value.trim();
+
+  if (!name || !passcode) {
+    alert("Please enter your name and passcode.");
+    return;
+  }
+
+  if (passcode.length !== 4 || isNaN(passcode)) {
+    alert("Passcode must be a 4-digit number.");
+    return;
+  }
+
+  // Load existing guests
+  let guests = JSON.parse(localStorage.getItem("guests")) || [];
+
+  // Randomized properties
+  const room = generateRandomRoom();
+  const vip = randomBool();
+  const hasPet = randomBool();
+  const earlyCheckInRequested = randomBool();
+  const notes = randomNote();
+  const guestsInRoom = Math.floor(Math.random() * 4) + 1;
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Guest object
+  const guest = {
+    name,
+    passcode,
+    room,
+    guestsInRoom,
+    roomStatus: "Checked In",
+    arrivalDate: today,
+    departureDate: "TBD",
+    key: `GV-${room}-${passcode}`,
+    keyStatus: "Active",
+    parkingInfo: "No Vehicle",
+    billing: "Pending",
+    creditCard: { type: "Visa", lastFour: "0000" },
+
+    // randomized
+    vip,
+    hasPet,
+    earlyCheckInRequested,
+    notes,
+
+    // start empty
+    requests: []
+  };
+
+  // Add to list
+  guests.push(guest);
+
+  // Save everything
+  localStorage.setItem("guests", JSON.stringify(guests));
+  localStorage.setItem("currentGuest", JSON.stringify(guest));
+
+  // Redirect to dashboard
+  window.location.href = "guest_dashboard.html";
+}
+</script>
+
 </body>
 </html>
