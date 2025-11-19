@@ -77,7 +77,6 @@
       margin-top: 4px;
     }
 
-    /* Request Form */
     .request-form {
       padding: 1rem;
       background: #fffdf7;
@@ -108,7 +107,7 @@
 
 <body>
   <header class="gv-header">
-    <img src="V(1).png" alt="Logo" class="gv-logo">
+    <img src="V(1).png" alt="Logo" class="gv-logo" style="height:100px; margin-bottom:1rem;">
     <h1 id="guestNameHeader">Guest Dashboard</h1>
   </header>
 
@@ -119,9 +118,6 @@
   </footer>
 
 <script>
-/* ---------------------------------------------------------
-   AUTO DELETE COMPLETED REQUESTS > 5 MINUTES OLD
---------------------------------------------------------- */
 function autoDeleteOldRequests(guest) {
   const FIVE_MIN = 5 * 60 * 1000;
   const now = Date.now();
@@ -136,9 +132,6 @@ function autoDeleteOldRequests(guest) {
   return guest;
 }
 
-/* ---------------------------------------------------------
-   LOAD DASHBOARD
---------------------------------------------------------- */
 function loadGuestDashboard() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   if (!guest) {
@@ -147,11 +140,9 @@ function loadGuestDashboard() {
     return;
   }
 
-  // Auto cleanup
   guest = autoDeleteOldRequests(guest);
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
-  // Save cleanup to global list
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
   const idx = allGuests.findIndex(g => g.name === guest.name && g.passcode === guest.passcode);
   if (idx !== -1) {
@@ -159,20 +150,16 @@ function loadGuestDashboard() {
     localStorage.setItem("guests", JSON.stringify(allGuests));
   }
 
-  // Greeting
   document.getElementById("guestNameHeader").textContent = `Welcome, ${guest.name}!`;
 
-  // Badges
   const badges = `
     ${guest.vip ? `<span class="badge">⭐ VIP</span>` : ""}
     ${guest.hasPet ? `<span class="badge">🐾 Pet in Room</span>` : ""}
     ${guest.earlyCheckInRequested ? `<span class="badge">⏰ Early Check-In</span>` : ""}
   `;
 
-  // Mask key
   const maskedKey = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
 
-  // Request history
   const sortedRequests = (guest.requests || [])
     .sort((a, b) => b.createdAt - a.createdAt);
 
@@ -189,9 +176,6 @@ function loadGuestDashboard() {
           </div>
         `).join("");
 
-  /* ---------------------------------------------------------
-      FULL PAGE HTML OUTPUT
-  --------------------------------------------------------- */
   document.getElementById("guestInfo").innerHTML = `
     <h2 class="section-title">Your Stay Information</h2>
 
@@ -247,8 +231,7 @@ function loadGuestDashboard() {
 function toggleKey() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
-  const current = keySpan.textContent;
-  keySpan.textContent = current.startsWith("****")
+  keySpan.textContent = keySpan.textContent.startsWith("****")
     ? guest.key
     : "****" + guest.key.slice(-4);
 }
@@ -281,7 +264,6 @@ function submitRequest() {
 
   guest.requests.push(newReq);
 
-  // Save
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
