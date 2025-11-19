@@ -6,7 +6,7 @@
   <title>Team Login – Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Load preloaded reservation file -->
+  <!-- Load sample reservations -->
   <script src="reservations.js"></script>
 
   <style>
@@ -14,9 +14,9 @@
       background-color: #fff;
       color: #000;
       font-family: Arial, sans-serif;
+      text-align: center;
       margin: 0;
       padding: 0;
-      text-align: center;
     }
 
     .container {
@@ -26,7 +26,7 @@
       border: 2px solid #d4af37;
       border-radius: 10px;
       background: #faf7ef;
-      box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+      box-shadow: 0 0 12px rgba(212,175,55,0.3);
     }
 
     h1 {
@@ -40,12 +40,11 @@
       margin: 0.5rem 0;
       border-radius: 6px;
       border: 1px solid #d4af37;
-      font-size: 1rem;
     }
 
     button {
       background-color: #d4af37;
-      color: #fff;
+      color: white;
       border: none;
       padding: 10px 15px;
       border-radius: 6px;
@@ -78,61 +77,58 @@
     <h1>Team Login</h1>
     <p>Authorized Users Only</p>
 
-    <!-- LOGIN FORM -->
+    <!-- Login inputs -->
     <input type="text" id="username" placeholder="Enter username">
     <input type="password" id="password" placeholder="Enter password">
     <button onclick="teamLogin()">Login</button>
 
-    <!-- ADMIN PANEL (HIDDEN UNTIL LOGIN) -->
+    <!-- Admin panel -->
     <div id="adminPanel">
       <h2 style="color:#d4af37;">Project Management Panel</h2>
-      <p>Use these tools to reset the training environment.</p>
+      <p>Reset the hotel to training mode.</p>
 
-      <!-- RESET BUTTON -->
       <button class="reset-btn" onclick="resetSimulation()">Reset & Load Sample Reservations</button>
 
       <p style="margin-top:1rem; font-size:0.9rem; color:#555;">
-        This will erase all current data and reload the 5 training sample guests.
+        This will erase all hotel data and reload the 5 sample guests.
       </p>
     </div>
   </div>
 
+<script>
+  function teamLogin() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
 
-  <!-- LOGIN + RESET LOGIC -->
-  <script>
-    function teamLogin() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
+    if (user === "team" && pass === "change") {
+      document.getElementById("adminPanel").style.display = "block";
+      alert("Welcome, Team!");
+    } else {
+      alert("Incorrect credentials.");
+    }
+  }
 
-      if (user === "team" && pass === "change") {
-        document.getElementById("adminPanel").style.display = "block";
-        alert("Welcome, Team!");
-      } else {
-        alert("Incorrect credentials.");
-      }
+  function resetSimulation() {
+    const confirmReset = confirm(
+      "⚠️ This will DELETE ALL data and reload 5 sample reservations.\n\nContinue?"
+    );
+    if (!confirmReset) return;
+
+    // 1. Clear all data
+    localStorage.clear();
+
+    // 2. Load sample guests (from reservations.js)
+    if (typeof seedSampleReservations === "function") {
+      seedSampleReservations();
+      alert("Hotel reset complete.\n\n5 sample reservations loaded!");
+    } else {
+      alert("Error: reservations.js not loaded!");
     }
 
-    function resetSimulation() {
-      const confirmReset = confirm(
-        "⚠️ This will CLEAR ALL hotel data and load 5 sample training reservations.\n\nAre you sure you want to continue?"
-      );
-      if (!confirmReset) return;
-
-      // Clear all localStorage hotel data
-      localStorage.clear();
-
-      // Load preloaded sample data
-      if (typeof seedSampleReservations === "function") {
-        seedSampleReservations();
-        alert("Hotel data reset.\n\n5 sample reservations loaded successfully!");
-      } else {
-        alert("Error: reservations.js not found.\n\nMake sure it is included in the HTML file.");
-      }
-
-      // Refresh UI after reset
-      location.reload();
-    }
-  </script>
+    // 3. Reload the page
+    location.reload();
+  }
+</script>
 
 </body>
 </html>
