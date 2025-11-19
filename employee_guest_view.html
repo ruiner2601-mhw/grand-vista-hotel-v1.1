@@ -127,17 +127,112 @@
     .btn-completed {
       background-color: #d4edda;
     }
+
+    /* Room status badges */
+    .room-status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+    .room-status-checked-in {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .room-status-checked-out {
+      background-color: #e2e3e5;
+      color: #383d41;
+      border: 1px solid #d6d8db;
+    }
+    .room-status-late-checkout {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffe58f;
+    }
+    .room-status-no-show {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .room-status-scheduled {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    /* Modal styles for Change Status */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 1.5rem;
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      max-width: 400px;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #d4af37;
+    }
+
+    .modal-actions {
+      margin-top: 1rem;
+      text-align: right;
+    }
+
+    .modal-actions button {
+      margin-left: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background-color: #e2e3e5;
+    }
+
+    .btn-save {
+      background-color: #d4af37;
+      color: #fff;
+    }
+
+    select.status-select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #d4af37;
+      margin-top: 0.5rem;
+    }
+
+    .info-line {
+      margin: 0.2rem 0;
+    }
   </style>
 </head>
 <body>
   <header class="gv-header">
     <img src="V.png" alt="Grand Vista Hotel Logo" style="height:100px; margin-bottom:1rem;">
     <h1>Guest Management Board</h1>
-    <p>View guest details, requests, and stay information</p>
+    <p>View guest details, requests, status, and stay information</p>
   </header>
 
   <main>
-    <h2 style="text-align:center;">Current Guests</h2>
+    <h2 style="text-align:center;">Current Guests & Reservations</h2>
     <table id="guestTable">
       <thead>
         <tr>
@@ -146,6 +241,7 @@
           <th>Arrival</th>
           <th>Departure</th>
           <th>Pending Requests</th>
+          <th>In-Room Status</th>
           <th>Key Status</th>
           <th>Actions</th>
         </tr>
@@ -157,6 +253,26 @@
   <footer>
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
+
+  <!-- Modal for changing room status -->
+  <div id="statusModal" class="modal">
+    <div class="modal-content">
+      <h3>Change In-Room Status</h3>
+      <p id="statusGuestName" class="info-line"></p>
+      <label for="statusSelect"><strong>Select new status:</strong></label>
+      <select id="statusSelect" class="status-select">
+        <option value="Checked In">Checked In</option>
+        <option value="Checked Out">Checked Out</option>
+        <option value="Scheduled Arrival">Scheduled Arrival</option>
+        <option value="Late Checkout">Late Checkout</option>
+        <option value="No-Show">No-Show</option>
+      </select>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
+        <button class="btn-save" onclick="saveRoomStatus()">Save</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     function randomDepartureDate() {
@@ -186,15 +302,32 @@
       return "Pending";
     }
 
+    function roomStatusClass(status) {
+      switch (status) {
+        case "Checked In":
+          return "room-status-checked-in";
+        case "Checked Out":
+          return "room-status-checked-out";
+        case "Late Checkout":
+          return "room-status-late-checkout";
+        case "No-Show":
+          return "room-status-no-show";
+        case "Scheduled Arrival":
+        default:
+          return "room-status-scheduled";
+      }
+    }
+
     function normalizeGuests(data) {
       return data.map(g => {
         if (!g.arrivalDate) g.arrivalDate = new Date().toISOString().split("T")[0];
         if (!g.departureDate) g.departureDate = randomDepartureDate();
-        if (!g.keyStatus) g.keyStatus = "Active";
+        if (!g.keyStatus) g.keyStatus = g.key ? "Active" : "Not Issued";
         if (!g.parkingInfo) g.parkingInfo = "1 Vehicle - Standard Parking";
         if (!g.billing) g.billing = "Paid in Full";
         if (!g.creditCard) g.creditCard = randomCard();
         if (!g.requests) g.requests = [];
+        if (!g.roomStatus) g.roomStatus = "Checked In"; // default for legacy guests
 
         g.requests = g.requests.map((r, index, arr) => {
           const baseCreated = Date.now() - (arr.length - index) * 1000;
@@ -224,10 +357,11 @@
     localStorage.setItem("guests", JSON.stringify(guests));
 
     const tableBody = document.getElementById("guestTableBody");
+    let activeStatusGuestIndex = null;
 
     function maskString(str) {
       if (!str) return "N/A";
-      return "****" + str.slice(-3);
+      return "****" + String(str).slice(-3);
     }
 
     function renderGuests() {
@@ -241,10 +375,17 @@
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${guest.name}</td>
-          <td>${guest.room}</td>
+          <td>${guest.room || "TBD"}</td>
           <td>${guest.arrivalDate}</td>
           <td>${guest.departureDate}</td>
           <td>${pendingCount}</td>
+          <td>
+            <span class="room-status-badge ${roomStatusClass(guest.roomStatus)}">
+              ${guest.roomStatus}
+            </span>
+            <br>
+            <button class="toggle-btn" onclick="openStatusModal(${gIndex})">Change Status</button>
+          </td>
           <td>${guest.keyStatus}</td>
           <td><button class="view-btn" onclick="toggleDetails(${gIndex})">View Details</button></td>
         `;
@@ -252,7 +393,6 @@
         const detailRow = document.createElement("tr");
         detailRow.className = "details";
 
-        // Sort requests by createdAt ascending for detail view
         const sortedReqs = [...guest.requests].sort((a, b) => a.createdAt - b.createdAt);
 
         const requestsHTML =
@@ -269,7 +409,15 @@
             : "<li>No requests</li>";
 
         detailRow.innerHTML = `
-          <td colspan="7">
+          <td colspan="8">
+            <p class="info-line"><strong>In-Room Status:</strong> ${guest.roomStatus}</p>
+            <p class="info-line"><strong>Guests in Room:</strong> ${guest.guestsInRoom || "N/A"}</p>
+            <p class="info-line"><strong>VIP:</strong> ${guest.vip ? "Yes" : "No"}</p>
+            <p class="info-line"><strong>Pet in Room:</strong> ${guest.hasPet ? "Yes" : "No"}</p>
+            <p class="info-line"><strong>Early Check-In Requested:</strong> ${guest.earlyCheckInRequested ? "Yes" : "No"}</p>
+            <p class="info-line"><strong>Notes:</strong> ${guest.notes || "None"}</p>
+            <br>
+
             <strong>Passcode:</strong>
             <span id="pass-${gIndex}">${maskString(guest.passcode)}</span>
             <button class="toggle-btn" onclick="toggleMask(${gIndex}, 'pass')">Show</button>
@@ -311,6 +459,62 @@
         span.textContent = maskString(type === "pass" ? guest.passcode : guest.key);
       }
     }
+
+    // Modal logic
+    function openStatusModal(guestIndex) {
+      guests = JSON.parse(localStorage.getItem("guests")) || [];
+      guests = normalizeGuests(guests);
+      activeStatusGuestIndex = guestIndex;
+
+      const guest = guests[guestIndex];
+      document.getElementById("statusGuestName").textContent = `Guest: ${guest.name} (Room ${guest.room || "TBD"})`;
+      const select = document.getElementById("statusSelect");
+      select.value = guest.roomStatus || "Checked In";
+
+      document.getElementById("statusModal").style.display = "block";
+    }
+
+    function closeStatusModal() {
+      document.getElementById("statusModal").style.display = "none";
+      activeStatusGuestIndex = null;
+    }
+
+    function saveRoomStatus() {
+      if (activeStatusGuestIndex === null) return;
+
+      const select = document.getElementById("statusSelect");
+      const newStatus = select.value;
+
+      guests = JSON.parse(localStorage.getItem("guests")) || [];
+      guests = normalizeGuests(guests);
+
+      guests[activeStatusGuestIndex].roomStatus = newStatus;
+
+      localStorage.setItem("guests", JSON.stringify(guests));
+
+      // Sync currentGuest if needed
+      let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+      if (currentGuest) {
+        const idx = guests.findIndex(
+          g => g.name === currentGuest.name && g.passcode === currentGuest.passcode
+        );
+        if (idx !== -1) {
+          currentGuest.roomStatus = guests[idx].roomStatus;
+          localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
+        }
+      }
+
+      closeStatusModal();
+      renderGuests();
+    }
+
+    // Close modal on background click
+    window.onclick = function (event) {
+      const modal = document.getElementById("statusModal");
+      if (event.target === modal) {
+        closeStatusModal();
+      }
+    };
 
     renderGuests();
   </script>
