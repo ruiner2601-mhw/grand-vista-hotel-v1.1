@@ -3,42 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grand Vista Hotel</title>
+  <title>Grand Vista Hotel | Welcome</title>
   <link rel="stylesheet" href="style.css" />
 
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
       background: #faf7ef;
+      margin: 0;
+      padding: 0;
       text-align: center;
     }
 
-    .logo {
-      height: 150px;
-      margin-top: 2rem;
-    }
-
-    h1 {
-      color: #d4af37;
-      margin-bottom: 0.5rem;
-    }
-
-    .center-box {
-      max-width: 430px;
+    .section-box {
+      max-width: 420px;
       margin: 2rem auto;
       padding: 2rem;
       background: white;
-      border-radius: 15px;
+      border-radius: 14px;
       border: 2px solid #d4af37;
-      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+      box-shadow: 0 4px 20px rgba(212,175,55,0.25);
     }
 
     .portal-btn {
       display: block;
       width: 100%;
       padding: 1rem;
-      margin: 1rem 0;
+      margin: 0.6rem 0;
       background: #d4af37;
       color: white;
       font-size: 1.1rem;
@@ -54,20 +45,47 @@
       background: #e6c86d;
       transform: scale(1.03);
     }
+
+    .gv-logo {
+      height: 120px;
+      margin-top: 1.5rem;
+    }
+
+    h2 {
+      margin-bottom: 1.2rem;
+      color: #333;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- Logo + Title -->
-  <img src="V(1).png" alt="Grand Vista Hotel Logo" class="logo" />
-  <h1>Grand Vista Hotel</h1>
-  <p>Welcome to the Digital Guest Experience</p>
+  <!-- HEADER -->
+  <header class="gv-header">
+    <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
+    <h1>Grand Vista Hotel</h1>
+    <p>Your Digital Check-In Experience</p>
+  </header>
 
-  <!-- Main Box -->
-  <div class="center-box">
+  <!-- GUEST SECTION -->
+  <div class="section-box">
+    <h2>Guest Access</h2>
+
     <a href="guest_checkin.html" class="portal-btn">Guest Check-In</a>
-    <a href="employee_login.html" class="portal-btn">Employee Login</a>
+
+    <!-- Button appears ONLY if someone is logged in -->
+    <div id="continueGuestContainer"></div>
+  </div>
+
+  <!-- EMPLOYEE SECTION -->
+  <div class="section-box">
+    <h2>Employee Portal</h2>
+    <a href="employee_index.html" class="portal-btn">Employee Login</a>
+  </div>
+
+  <!-- PROJECT TEAM SECTION -->
+  <div class="section-box">
+    <h2>Project Team Access</h2>
     <a href="team_login.html" class="portal-btn">Project Team Login</a>
   </div>
 
@@ -75,18 +93,17 @@
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
 
-  <!-- Load reservation seeding file -->
-  <script src="reservations.js"></script>
-
-  <!-- Auto-load 5 sample guests for new users -->
   <script>
-    if (!localStorage.getItem("guests")) {
-      try {
-        seedSampleReservations();
-        console.log("Sample guest data loaded for first-time visitor.");
-      } catch (e) {
-        console.error("Error loading sample data:", e);
-      }
+    // Show "Continue as Current Guest" if logged in
+    const currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+    const container = document.getElementById("continueGuestContainer");
+
+    if (currentGuest) {
+      container.innerHTML = `
+        <a href="guest_dashboard.html" class="portal-btn">
+          Continue as ${currentGuest.name}
+        </a>
+      `;
     }
   </script>
 
