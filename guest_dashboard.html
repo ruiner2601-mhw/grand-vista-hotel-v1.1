@@ -75,6 +75,35 @@
       display: block;
       margin-top: 4px;
     }
+
+    /* NEW REQUEST FORM */
+    .request-form {
+      padding: 1rem;
+      background: #fffdf7;
+      border: 1px solid #e8d7a9;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    select, input, button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #d4af37;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    button {
+      background: #d4af37;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #e5c864;
+    }
   </style>
 </head>
 
@@ -91,6 +120,20 @@
   </footer>
 
 <script>
+function autoDeleteOldRequests(guest) {
+  const FIVE_MIN = 5 * 60 * 1000;
+  const now = Date.now();
+
+  guest.requests = guest.requests.filter(req => {
+    if (req.status === "completed" && req.completedAt) {
+      return (now - req.completedAt) < FIVE_MIN;
+    }
+    return true;
+  });
+
+  return guest;
+}
+
 function loadGuestDashboard() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   if (!guest) {
@@ -99,42 +142,49 @@ function loadGuestDashboard() {
     return;
   }
 
-  // Header name
-  document.getElementById("guestNameHeader").textContent =
-    `Welcome, ${guest.name}!`;
+  // Auto-delete completed requests older than 5 minutes
+  guest = autoDeleteOldRequests(guest);
 
-  // Badge generation
+  // save cleanup
+  localStorage.setItem("currentGuest", JSON.stringify(guest));
+
+  let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
+  const idx = allGuests.findIndex(g => g.name === guest.name && g.passcode === guest.passcode);
+  if (idx !== -1) {
+    allGuests[idx] = guest;
+    localStorage.setItem("guests", JSON.stringify(allGuests));
+  }
+
+  document.getElementById("guestNameHeader").textContent = `Welcome, ${guest.name}!`;
+
+  // Badges
   const badges = `
     ${guest.vip ? `<span class="badge">⭐ VIP</span>` : ""}
     ${guest.hasPet ? `<span class="badge">🐾 Pet in Room</span>` : ""}
     ${guest.earlyCheckInRequested ? `<span class="badge">⏰ Early Check-In</span>` : ""}
   `;
 
-  // Key masking
-  const maskedKey = guest.key
-    ? "****" + guest.key.slice(-4)
-    : "Not Assigned";
+  // Mask key
+  const maskedKey = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
 
-  // Build request history sorted newest → oldest
+  // Request history sorted newest → oldest
   const sortedRequests = (guest.requests || [])
     .sort((a, b) => b.createdAt - a.createdAt);
 
   const requestsHTML =
     sortedRequests.length === 0
       ? `<p>No requests submitted yet.</p>`
-      : sortedRequests
-          .map(r => `
-            <div class="request-box">
-              <strong>${r.text}</strong>
-              <span class="request-status status-${r.status}">
-                ${r.status.replace("-", " ")}
-              </span>
-              <span class="timestamp">${r.date}</span>
-            </div>
-          `)
-          .join("");
+      : sortedRequests.map(r => `
+          <div class="request-box">
+            <strong>${r.text}</strong>
+            <span class="request-status status-${r.status}">
+              ${r.status.replace("-", " ")}
+            </span>
+            <span class="timestamp">${r.date}</span>
+          </div>
+        `).join("");
 
-  // Final HTML
+  // FULL PAGE HTML
   document.getElementById("guestInfo").innerHTML = `
     <h2>Your Stay Information</h2>
 
@@ -152,8 +202,29 @@ function loadGuestDashboard() {
     <h3>Your Digital Key</h3>
     <p>
       <span id="keyValue">${maskedKey}</span>
-      <button class="toggle-btn" onclick="toggleKey()">Show</button>
+      <button onclick="toggleKey()">Show</button>
     </p>
+
+    <br>
+
+    <h3>Create a New Service Request</h3>
+
+    <div class="request-form">
+      <select id="requestType">
+        <option value="">Select a Request</option>
+        <option>Towels</option>
+        <option>Toiletries</option>
+        <option>Extra Pillows</option>
+        <option>Blankets</option>
+        <option>Food Delivery</option>
+        <option>Wake-Up Call</option>
+        <option>Other</option>
+      </select>
+
+      <input id="otherRequest" style="display:none;" placeholder="Describe your request...">
+
+      <button onclick="submitRequest()">Submit Request</button>
+    </div>
 
     <br>
 
@@ -166,13 +237,55 @@ function toggleKey() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
   const current = keySpan.textContent;
-
-  if (current.startsWith("****")) {
-    keySpan.textContent = guest.key;
-  } else {
-    keySpan.textContent = "****" + guest.key.slice(-4);
-  }
+  keySpan.textContent = current.startsWith("****")
+    ? guest.key
+    : "****" + guest.key.slice(-4);
 }
+
+function submitRequest() {
+  let guest = JSON.parse(localStorage.getItem("currentGuest"));
+  let type = document.getElementById("requestType").value;
+  let other = document.getElementById("otherRequest");
+
+  if (type === "") {
+    alert("Please select a request type.");
+    return;
+  }
+
+  if (type === "Other") {
+    if (!other.value.trim()) {
+      alert("Please describe your request.");
+      return;
+    }
+    type = other.value.trim();
+  }
+
+  const newReq = {
+    text: type,
+    status: "pending",
+    date: new Date().toLocaleString(),
+    createdAt: Date.now(),
+    completedAt: null
+  };
+
+  guest.requests.push(newReq);
+
+  localStorage.setItem("currentGuest", JSON.stringify(guest));
+
+  let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
+  const idx = allGuests.findIndex(g => g.name === guest.name && g.passcode === guest.passcode);
+  if (idx !== -1) {
+    allGuests[idx] = guest;
+    localStorage.setItem("guests", JSON.stringify(allGuests));
+  }
+
+  location.reload();
+}
+
+document.getElementById("requestType").addEventListener("change", function () {
+  const otherBox = document.getElementById("otherRequest");
+  otherBox.style.display = this.value === "Other" ? "block" : "none";
+});
 
 loadGuestDashboard();
 </script>
