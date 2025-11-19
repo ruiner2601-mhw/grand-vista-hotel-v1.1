@@ -8,55 +8,50 @@
 
   <style>
     body {
+      text-align:center;
+      background:#faf7ef;
       font-family: Arial, sans-serif;
-      background: #faf7ef;
-      margin: 0;
-      padding: 0;
     }
 
     .login-box {
       max-width: 420px;
-      margin: 4rem auto;
+      margin: 3rem auto;
       padding: 2rem;
       background: white;
-      border-radius: 14px;
+      border-radius: 12px;
       border: 2px solid #d4af37;
-      box-shadow: 0 4px 20px rgba(212,175,55,0.25);
-      text-align: center;
+      box-shadow: 0 3px 15px rgba(212,175,55,0.25);
     }
 
-    .login-box input {
+    input {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
-      border: 1px solid #d4af37;
       border-radius: 8px;
+      border: 1px solid #d4af37;
       font-size: 1rem;
     }
 
-    .btn-login {
+    button {
       width: 100%;
       padding: 12px;
-      background: #d4af37;
-      color: white;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-top: 10px;
+      background:#d4af37;
+      color:white;
+      border:none;
+      font-size:1.1rem;
+      font-weight:bold;
+      border-radius:10px;
+      cursor:pointer;
+      margin-top:10px;
     }
 
-    .btn-login:hover {
-      background: #e6c86d;
-      transform: scale(1.03);
+    button:hover {
+      background:#e6c86d;
     }
 
-    .error-msg {
-      color: #b30000;
-      font-weight: bold;
-      margin-top: 10px;
-      display: none;
+    .gv-logo {
+      height:100px;
+      margin-bottom:1rem;
     }
   </style>
 </head>
@@ -64,38 +59,26 @@
 <body>
 
   <header class="gv-header">
-    <img src="V(1).png" alt="Logo" class="gv-logo" style="height:100px;">
+    <img src="V(1).png" class="gv-logo">
     <h1>Employee Login</h1>
-    <p>Please enter your credentials</p>
   </header>
 
   <div class="login-box">
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-
-    <button class="btn-login" onclick="employeeLogin()">Login</button>
-
-    <p id="errorMessage" class="error-msg">Incorrect username or password</p>
+    <input id="empUser" type="text" placeholder="Username">
+    <input id="empPass" type="password" placeholder="Password">
+    <button onclick="employeeLogin()">Log In</button>
   </div>
-
-  <footer>
-    <p>&copy; 2025 Grand Vista Hotel</p>
-  </footer>
-
 
 <script>
 function employeeLogin() {
-  const user = document.getElementById("username").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  const error = document.getElementById("errorMessage");
+  const user = document.getElementById("empUser").value.trim();
+  const pass = document.getElementById("empPass").value.trim();
 
   if (user === "admin" && pass === "grandvista") {
-    // Save a flag so employees stay logged in
     localStorage.setItem("employeeLoggedIn", "true");
-
     window.location.href = "employee_portal.html";
   } else {
-    error.style.display = "block";
+    alert("Invalid credentials.");
   }
 }
 </script>
