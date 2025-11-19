@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Service Management | Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      background: #fff;
+      color: #000;
+    }
+
+    .kanban-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 2rem auto;
+      max-width: 1400px;
+      gap: 1.5rem;
+    }
+
+    .kanban-column {
+      flex: 1;
+      background: #f9f6ed;
+      border: 2px solid #d4af37;
+      border-radius: 12px;
+      padding: 1rem;
+      min-height: 70vh;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+    }
+
+    .kanban-column h2 {
+      text-align: center;
+      color: #d4af37;
+      margin-bottom: 1rem;
+    }
+
+    .kanban-card {
+      background: #fff;
+      border: 1px solid #d4af37;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .kanban-card strong {
+      color: #000;
+    }
+
+    .timestamp {
+      font-size: 0.8rem;
+      color: #777;
+      display: block;
+      margin-top: 0.4rem;
+    }
+
+    .action-btns {
+      margin-top: 0.6rem;
+    }
+
+    .action-btns button {
+      padding: 0.4rem 0.7rem;
+      border: none;
+      border-radius: 6px;
+      margin-right: 0.3rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn-pending { background: #fff3cd; }
+    .btn-progress { background: #d1ecf1; }
+    .btn-complete { background: #d4edda; }
+  </style>
+</head>
+
+<body>
+
+<header class="gv-header">
+  <img src="V.png" style="height:100px; margin-bottom:1rem;">
+  <h1>Room Service Requests</h1>
+  <p>Employee Operations Board</p>
+</header>
+
+<div class="kanban-container">
+  
+  <!-- Pending Column -->
+  <div class="kanban-column">
+    <h2>Pending</h2>
+    <div id="pendingCol"></div>
+  </div>
+
+  <!-- In Progress Column -->
+  <div class="kanban-column">
+    <h2>In Progress</h2>
+    <div id="progressCol"></div>
+  </div>
+
+  <!-- Completed Column -->
+  <div class="kanban-column">
+    <h2>Completed</h2>
+    <div id="completedCol"></div>
+  </div>
+
+</div>
+
+<script>
+  let guests = JSON.parse(localStorage.getItem("guests")) || [];
+
+  function updateAll() {
+    const pendingCol = document.getElementById("pendingCol");
+    const progressCol = document.getElementById("progressCol");
+    const completedCol = document.getElementById("completedCol");
+
+    pendingCol.innerHTML = "";
+    progressCol.innerHTML = "";
+    completedCol.innerHTML = "";
+
+    guests.forEach((guest, gIndex) => {
+      if (!guest.requests) return;
+
+      guest.requests.forEach((req, rIndex) => {
+        const card = document.createElement("div");
+        card.className = "kanban-card";
+
+        card.innerHTML = `
+          <strong>Guest:</strong> ${guest.name}<br>
+          <strong>Room:</strong> ${guest.room}<br>
+          <strong>Request:</strong> ${req.text}<br>
+          <span class="timestamp">${req.date}</span>
+
+          <div class="action-btns">
+            <button class="btn-pending" onclick="setStatus(${gIndex}, ${rIndex}, 'pending')">Pending</button>
+            <button class="btn-progress" onclick="setStatus(${gIndex}, ${rIndex}, 'in-progress')">In Progress</button>
+            <button class="btn-complete" onclick="setStatus(${gIndex}, ${rIndex}, 'completed')">Completed</button>
+          </div>
+        `;
+
+        if (req.status === "pending") pendingCol.appendChild(card);
+        else if (req.status === "in-progress") progressCol.appendChild(card);
+        else completedCol.appendChild(card);
+      });
+    });
+  }
+
+  function setStatus(guestIndex, requestIndex, newStatus) {
+    guests[guestIndex].requests[requestIndex].status = newStatus;
+    localStorage.setItem("guests", JSON.stringify(guests));
+
+    let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+    if (
+      currentGuest &&
+      currentGuest.name === guests[guestIndex].name &&
+      currentGuest.passcode === guests[guestIndex].passcode
+    ) {
+      currentGuest.requests = guests[guestIndex].requests;
+      localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
+    }
+
+    updateAll();
+  }
+
+  updateAll();
+</script>
+
+</body>
+</html>
