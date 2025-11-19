@@ -32,7 +32,7 @@
   <div class="checkin-box">
     <input type="text" id="guestName" placeholder="Enter your full name">
     <input type="password" id="guestPasscode" placeholder="Enter a 4-digit passcode">
-    <button class="btn" onclick="checkInGuest()">Complete Check-In</button>
+    <button class="btn" onclick="checkInGuest()">Continue</button>
   </div>
 
   <footer>
@@ -40,21 +40,18 @@
   </footer>
 
 <script>
-/* -----------------------------
+/* --------------------------------------
    RANDOMIZATION FUNCTIONS
------------------------------- */
+--------------------------------------- */
 
-// Random room number 1–200
 function generateRandomRoom() {
-  return Math.floor(Math.random() * 200) + 1;
+  return Math.floor(Math.random() * 200) + 1; // 1–200
 }
 
-// random true/false
 function randomBool() {
   return Math.random() < 0.5;
 }
 
-// random hotel-style notes
 function randomNote() {
   const notes = [
     "Prefers high floor",
@@ -68,15 +65,15 @@ function randomNote() {
     "Late arrival expected",
     "Early arrival expected",
     "Prefers extra pillows",
-    "Requests hypoallergenic bedding",
+    "Hypoallergenic bedding requested",
     "Enjoys pool view rooms"
   ];
   return notes[Math.floor(Math.random() * notes.length)];
 }
 
-/* -----------------------------
-   MAIN CHECK-IN FUNCTION
------------------------------- */
+/* --------------------------------------
+   MAIN CHECK-IN / LOGIN LOGIC
+--------------------------------------- */
 
 function checkInGuest() {
   const name = document.getElementById("guestName").value.trim();
@@ -95,18 +92,41 @@ function checkInGuest() {
   // Load existing guests
   let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-  // Randomized properties
+  /* --------------------------------------
+     FIX: CLEAN SAMPLE DATA FOR SAFETY
+  --------------------------------------- */
+  guests = guests.map(g => ({
+    ...g,
+    guestsInRoom: g.guestsInRoom || Math.floor(Math.random() * 4) + 1,
+  }));
+
+  /* --------------------------------------
+     STEP 1 — CHECK IF GUEST ALREADY EXISTS
+  --------------------------------------- */
+  let existingGuest = guests.find(
+    g => g.name.toLowerCase() === name.toLowerCase() &&
+         g.passcode === passcode
+  );
+
+  if (existingGuest) {
+    // LOGIN MODE
+    localStorage.setItem("currentGuest", JSON.stringify(existingGuest));
+    window.location.href = "guest_dashboard.html";
+    return;
+  }
+
+  /* --------------------------------------
+     STEP 2 — OTHERWISE, CREATE NEW GUEST
+  --------------------------------------- */
   const room = generateRandomRoom();
   const vip = randomBool();
   const hasPet = randomBool();
   const earlyCheckInRequested = randomBool();
   const notes = randomNote();
   const guestsInRoom = Math.floor(Math.random() * 4) + 1;
-
   const today = new Date().toISOString().split("T")[0];
 
-  // Guest object
-  const guest = {
+  const newGuest = {
     name,
     passcode,
     room,
@@ -130,14 +150,12 @@ function checkInGuest() {
     requests: []
   };
 
-  // Add to list
-  guests.push(guest);
+  guests.push(newGuest);
 
-  // Save everything
+  // Save all data
   localStorage.setItem("guests", JSON.stringify(guests));
-  localStorage.setItem("currentGuest", JSON.stringify(guest));
+  localStorage.setItem("currentGuest", JSON.stringify(newGuest));
 
-  // Redirect to dashboard
   window.location.href = "guest_dashboard.html";
 }
 </script>
