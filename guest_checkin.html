@@ -8,6 +8,7 @@
 
   <style>
     a { text-decoration: none; color: inherit; }
+
     .checkin-box {
       max-width: 500px;
       margin: 2rem auto;
@@ -17,6 +18,32 @@
       border: 2px solid #E8D7A9;
       box-shadow: 0 4px 20px rgba(212,175,55,0.15);
       text-align: center;
+    }
+
+    input {
+      width: 92%;
+      padding: 12px;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      border: 1px solid #d4af37;
+      font-size: 1rem;
+    }
+
+    button.btn {
+      width: 100%;
+      padding: 12px;
+      background: #d4af37;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    button.btn:hover {
+      background: #e5c864;
     }
   </style>
 </head>
@@ -54,7 +81,7 @@ function randomBool() {
   return Math.random() < 0.5;
 }
 
-// Random hospitality-style notes
+// Random hospitality notes
 function randomNote() {
   const notes = [
     "Prefers high floor",
@@ -74,13 +101,13 @@ function randomNote() {
   return notes[Math.floor(Math.random() * notes.length)];
 }
 
-// Random departure date 1–7 days after arrival
-function randomDepartureDate() {
+// Random departure date (1–7 days after arrival)
+function generateDepartureDate() {
   const today = new Date();
-  const offset = Math.floor(Math.random() * 7) + 1; // 1–7 days
-  const departure = new Date(today);
-  departure.setDate(today.getDate() + offset);
-  return departure.toISOString().split("T")[0];
+  const offset = Math.floor(Math.random() * 7) + 1;
+  const dep = new Date(today);
+  dep.setDate(today.getDate() + offset);
+  return dep.toISOString().split("T")[0];
 }
 
 /* --------------------------------------
@@ -103,14 +130,14 @@ function checkInGuest() {
 
   let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-  // Fix undefined guest counts
+  // Fix legacy guests missing guestsInRoom
   guests = guests.map(g => ({
     ...g,
     guestsInRoom: g.guestsInRoom || Math.floor(Math.random() * 4) + 1
   }));
 
   /* --------------------------------------
-     STEP 1 — EXISTING GUEST LOGIN
+     LOGIN EXISTING GUEST
   --------------------------------------- */
   let existingGuest = guests.find(
     g => g.name.toLowerCase() === name.toLowerCase() &&
@@ -118,7 +145,6 @@ function checkInGuest() {
   );
 
   if (existingGuest) {
-
     existingGuest.roomStatus = "Checked In";
 
     if (!existingGuest.key) {
@@ -142,7 +168,7 @@ function checkInGuest() {
   }
 
   /* --------------------------------------
-     STEP 2 — NEW GUEST CREATION
+     CREATE NEW GUEST RECORD
   --------------------------------------- */
 
   const room = generateRandomRoom();
@@ -153,6 +179,7 @@ function checkInGuest() {
   const guestsInRoom = Math.floor(Math.random() * 4) + 1;
 
   const today = new Date().toISOString().split("T")[0];
+  const departure = generateDepartureDate();
 
   const newGuest = {
     name,
@@ -161,25 +188,22 @@ function checkInGuest() {
     guestsInRoom,
     roomStatus: "Checked In",
     arrivalDate: today,
-    departureDate: randomDepartureDate(),  // ✔ FIXED HERE
+    departureDate: departure,
     key: `GV-${room}-${passcode}`,
     keyStatus: "Active",
     parkingInfo: "No Vehicle",
     billing: "Pending",
     creditCard: { type: "Visa", lastFour: "0000" },
 
-    // randomized features
     vip,
     hasPet,
     earlyCheckInRequested,
     notes,
-
     requests: []
   };
 
   guests.push(newGuest);
 
-  // Save to localStorage
   localStorage.setItem("guests", JSON.stringify(guests));
   localStorage.setItem("currentGuest", JSON.stringify(newGuest));
 
