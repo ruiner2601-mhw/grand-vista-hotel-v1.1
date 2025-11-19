@@ -76,7 +76,19 @@
       margin-top: 4px;
     }
 
-    /* NEW REQUEST FORM */
+    /* Checkout banner */
+    .checkout-banner {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* Request Form */
     .request-form {
       padding: 1rem;
       background: #fffdf7;
@@ -108,18 +120,19 @@
 </head>
 
 <body>
-  <header class="gv-header">
-    <img src="V(1).png" alt="Logo" class="gv-logo">
-    <h1 id="guestNameHeader">Guest Dashboard</h1>
-  </header>
+<header class="gv-header">
+  <img src="V(1).png" alt="Logo" class="gv-logo">
+  <h1 id="guestNameHeader">Guest Dashboard</h1>
+</header>
 
-  <div class="dashboard-box" id="guestInfo"></div>
+<div class="dashboard-box" id="guestInfo"></div>
 
-  <footer>
-    <p>&copy; 2025 Grand Vista Hotel</p>
-  </footer>
+<footer>
+  <p>&copy; 2025 Grand Vista Hotel</p>
+</footer>
 
 <script>
+/* Auto-delete completed requests older than 5 minutes */
 function autoDeleteOldRequests(guest) {
   const FIVE_MIN = 5 * 60 * 1000;
   const now = Date.now();
@@ -134,16 +147,6 @@ function autoDeleteOldRequests(guest) {
   return guest;
 }
 
-function attachFormListeners() {
-  const typeSelect = document.getElementById("requestType");
-  if (!typeSelect) return; // avoid crash
-
-  typeSelect.addEventListener("change", function () {
-    const otherBox = document.getElementById("otherRequest");
-    otherBox.style.display = this.value === "Other" ? "block" : "none";
-  });
-}
-
 function loadGuestDashboard() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   if (!guest) {
@@ -152,12 +155,15 @@ function loadGuestDashboard() {
     return;
   }
 
-  // Auto-delete completed requests older than 5 minutes
+  const isCheckedOut = guest.roomStatus === "Checked Out";
+
+  // Cleanup old requests
   guest = autoDeleteOldRequests(guest);
 
   // Save cleanup
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
+  // Sync to main guest list
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
   const idx = allGuests.findIndex(g => g.name === guest.name && g.passcode === guest.passcode);
   if (idx !== -1) {
@@ -167,16 +173,18 @@ function loadGuestDashboard() {
 
   document.getElementById("guestNameHeader").textContent = `Welcome, ${guest.name}!`;
 
+  // Badges
   const badges = `
     ${guest.vip ? `<span class="badge">⭐ VIP</span>` : ""}
     ${guest.hasPet ? `<span class="badge">🐾 Pet in Room</span>` : ""}
     ${guest.earlyCheckInRequested ? `<span class="badge">⏰ Early Check-In</span>` : ""}
   `;
 
+  // Mask key
   const maskedKey = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
 
-  const sortedRequests = (guest.requests || [])
-    .sort((a, b) => b.createdAt - a.createdAt);
+  // Request history (newest to oldest)
+  const sortedRequests = (guest.requests || []).sort((a, b) => b.createdAt - a.createdAt);
 
   const requestsHTML =
     sortedRequests.length === 0
@@ -191,9 +199,38 @@ function loadGuestDashboard() {
           </div>
         `).join("");
 
-  document.getElementById("guestInfo").innerHTML = `
-    <h2>Your Stay Information</h2>
+  /* If the guest is checked out, hide request form and show message. */
+  const checkoutNotice = isCheckedOut
+    ? `<div class="checkout-banner">You are checked out. No new service requests can be submitted.</div>`
+    : "";
 
+  const requestSection = isCheckedOut
+    ? ""  
+    : `
+      <h3>Create a New Service Request</h3>
+
+      <div class="request-form">
+        <select id="requestType">
+          <option value="">Select a Request</option>
+          <option>Towels</option>
+          <option>Toiletries</option>
+          <option>Extra Pillows</option>
+          <option>Blankets</option>
+          <option>Food Delivery</option>
+          <option>Wake-Up Call</option>
+          <option>Other</option>
+        </select>
+
+        <input id="otherRequest" style="display:none;" placeholder="Describe your request...">
+
+        <button onclick="submitRequest()">Submit Request</button>
+      </div>
+    `;
+
+  document.getElementById("guestInfo").innerHTML = `
+    ${checkoutNotice}
+
+    <h2>Your Stay Information</h2>
     ${badges}
 
     <p class="info-line"><strong>Room Number:</strong> ${guest.room}</p>
@@ -207,45 +244,24 @@ function loadGuestDashboard() {
 
     <h3>Your Digital Key</h3>
     <p>
-      <span id="keyValue">${maskedKey}</span>
-      <button onclick="toggleKey()">Show</button>
+      <span id="keyValue">${isCheckedOut ? "Inactive" : maskedKey}</span>
+      ${!isCheckedOut ? `<button onclick="toggleKey()">Show</button>` : ""}
     </p>
 
     <br>
 
-    <h3>Create a New Service Request</h3>
-
-    <div class="request-form">
-      <select id="requestType">
-        <option value="">Select a Request</option>
-        <option>Towels</option>
-        <option>Toiletries</option>
-        <option>Extra Pillows</option>
-        <option>Blankets</option>
-        <option>Food Delivery</option>
-        <option>Wake-Up Call</option>
-        <option>Other</option>
-      </select>
-
-      <input id="otherRequest" style="display:none;" placeholder="Describe your request...">
-
-      <button onclick="submitRequest()">Submit Request</button>
-    </div>
-
-    <br>
+    ${requestSection}
 
     <h3>Your Service Requests</h3>
     ${requestsHTML}
   `;
-
-  // FIX: attach the listener AFTER HTML is inserted
-  attachFormListeners();
 }
 
 function toggleKey() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
   const current = keySpan.textContent;
+
   keySpan.textContent = current.startsWith("****")
     ? guest.key
     : "****" + guest.key.slice(-4);
@@ -291,8 +307,14 @@ function submitRequest() {
   location.reload();
 }
 
+document.addEventListener("change", function (e) {
+  if (e.target.id === "requestType") {
+    document.getElementById("otherRequest").style.display =
+      e.target.value === "Other" ? "block" : "none";
+  }
+});
+
 loadGuestDashboard();
 </script>
-
 </body>
 </html>
