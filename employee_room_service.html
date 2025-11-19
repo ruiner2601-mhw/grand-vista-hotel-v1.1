@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
+    /* === GLOBAL === */
     body {
       font-family: Arial, sans-serif;
       background: #faf7ef;
@@ -19,91 +20,126 @@
       margin: 0;
     }
 
+    /* === KANBAN LAYOUT === */
     .kanban-container {
       display: flex;
       justify-content: space-evenly;
-      padding: 2rem;
       gap: 1.5rem;
+      padding: 2rem;
     }
 
     .kanban-column {
-      background: white;
       width: 30%;
       padding: 1rem;
-      border: 2px solid #d4af37;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(212,175,55,0.2);
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(212,175,55,0.25);
     }
 
     .kanban-column h2 {
       text-align: center;
-      color: #d4af37;
-      margin-bottom: 1rem;
       font-size: 1.4rem;
+      margin: 0 0 1rem 0;
+      padding-bottom: 0.5rem;
+      color: #2b2b2b;
+      font-weight: 700;
+      border-bottom: 2px solid rgba(0,0,0,0.1);
     }
 
+    /* === DISTINCT COLUMN COLORS === */
+    #pendingCol {
+      background-color: #FFF1C2;
+      border: 2px solid #C49A00;
+    }
+
+    #inProgressCol {
+      background-color: #D3E7FF;
+      border: 2px solid #5A8CC8;
+    }
+
+    #completedCol {
+      background-color: #D9F7D9;
+      border: 2px solid #56A06A;
+    }
+
+    /* === REQUEST CARDS === */
     .request-card {
-      background: #fffdfa;
-      border: 1px solid #e8d7a9;
-      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #e0d8c0;
+      border-radius: 10px;
       padding: 0.9rem;
-      margin-bottom: 0.9rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      position: relative;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .request-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.18);
     }
 
     .request-card strong {
+      font-size: 1.15rem;
       display: block;
-      font-size: 1.1rem;
       margin-bottom: 0.3rem;
+      color: #333;
     }
 
     .timestamp {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: #777;
       margin-top: 4px;
     }
 
+    /* Status badges */
     .badge {
       display: inline-block;
-      padding: 3px 8px;
-      border-radius: 8px;
+      padding: 4px 9px;
+      border-radius: 20px;
       font-size: 0.75rem;
       font-weight: bold;
-      margin-top: 5px;
+      margin-top: 6px;
     }
 
     .pending {
-      background: #fff3cd;
-      border: 1px solid #ffe58f;
-      color: #8a6d1d;
+      background: #ffe9a8;
+      border: 1px solid #e0b900;
+      color: #7a5f00;
     }
 
     .in-progress {
-      background: #d1ecf1;
-      border: 1px solid #bee5eb;
-      color: #0c5460;
+      background: #bcd9ff;
+      border: 1px solid #6998d0;
+      color: #204d74;
     }
 
     .completed {
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
+      background: #c7f5c7;
+      border: 1px solid #4d955d;
       color: #155724;
     }
 
+    /* Buttons */
     .action-btn {
       margin-top: 8px;
       width: 100%;
-      padding: 6px;
-      background: #f7e6ba;
+      padding: 7px;
+      background: #f1d995;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
+      font-weight: bold;
+      color: #5e4a00;
+      transition: background 0.2s ease, transform 0.1s ease;
     }
 
     .action-btn:hover {
-      background: #ffe9a9;
+      background: #ffebad;
+      transform: scale(1.02);
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
     }
   </style>
 </head>
@@ -160,9 +196,8 @@ function loadRequests() {
         <p><em>Guest:</em> ${guest.name} (Room ${guest.room})</p>
       `;
 
-      // FORWARD + BACKWARD MOVEMENT BUTTONS
+      /* === FORWARD + BACKWARD MOVEMENT BUTTONS === */
 
-      // --- Pending column ---
       if (req.status === "pending") {
         card.innerHTML += `
           <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'in-progress')">➡ Move to In Progress</button>
@@ -170,7 +205,6 @@ function loadRequests() {
         `;
       }
 
-      // --- In progress column ---
       if (req.status === "in-progress") {
         card.innerHTML += `
           <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'completed')">✔ Mark Completed</button>
@@ -178,7 +212,6 @@ function loadRequests() {
         `;
       }
 
-      // --- Completed column ---
       if (req.status === "completed") {
         card.innerHTML += `
           <button class="action-btn" onclick="changeStatus(${guestIndex}, ${reqIndex}, 'in-progress')">⬅ Move to In Progress</button>
@@ -186,10 +219,12 @@ function loadRequests() {
         `;
       }
 
-      // Place card in correct column
+      /* === ADD CARD TO COLUMN === */
+
       if (req.status === "pending") pendingCol.appendChild(card);
       else if (req.status === "in-progress") inProgressCol.appendChild(card);
       else completedCol.appendChild(card);
+
     });
   });
 }
