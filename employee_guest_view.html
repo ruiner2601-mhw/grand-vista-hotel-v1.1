@@ -44,9 +44,7 @@
     }
 
     button.view-btn,
-    button.edit-btn,
-    button.checkout-btn,
-    button.rekey-btn {
+    button.action-btn {
       background-color: #d4af37;
       color: #fff;
       border: none;
@@ -61,9 +59,7 @@
     }
 
     button.view-btn:hover,
-    button.edit-btn:hover,
-    button.checkout-btn:hover,
-    button.rekey-btn:hover {
+    button.action-btn:hover {
       background-color: #e5c864;
     }
 
@@ -147,7 +143,7 @@
       border: 1px solid #bee5eb;
     }
 
-    /* Modal styles (used for both status & edit) */
+    /* Single Actions Modal */
     .modal {
       display: none;
       position: fixed;
@@ -162,11 +158,11 @@
 
     .modal-content {
       background-color: #fff;
-      margin: 6% auto;
+      margin: 5% auto;
       padding: 1.5rem;
       border: 2px solid #d4af37;
       border-radius: 10px;
-      max-width: 500px;
+      max-width: 520px;
       box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
     }
 
@@ -175,14 +171,20 @@
       color: #d4af37;
     }
 
+    .modal-section-title {
+      font-weight: 700;
+      margin-top: 0.8rem;
+      margin-bottom: 0.3rem;
+    }
+
     .modal-actions {
-      margin-top: 1rem;
+      margin-top: 1.2rem;
       text-align: right;
     }
 
     .modal-actions button {
       margin-left: 0.5rem;
-      padding: 0.4rem 0.8rem;
+      padding: 0.45rem 0.9rem;
       border-radius: 6px;
       border: none;
       cursor: pointer;
@@ -198,24 +200,27 @@
       color: #fff;
     }
 
-    select.status-select {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #d4af37;
-      margin-top: 0.5rem;
+    .btn-danger {
+      background-color: #c0392b;
+      color: #fff;
     }
 
-    /* Edit modal specific fields */
-    .edit-field {
-      margin: 0.5rem 0;
+    .btn-secondary {
+      background-color: #b89c4f;
+      color: #fff;
     }
+
+    .edit-field {
+      margin: 0.35rem 0;
+    }
+
     .edit-field label {
       display: block;
       font-size: 0.9rem;
       margin-bottom: 0.15rem;
       font-weight: 600;
     }
+
     .edit-field input,
     .edit-field select,
     .edit-field textarea {
@@ -225,9 +230,10 @@
       border: 1px solid #d4af37;
       font-size: 0.9rem;
     }
+
     .edit-field textarea {
       resize: vertical;
-      min-height: 60px;
+      min-height: 50px;
     }
 
   </style>
@@ -262,31 +268,24 @@
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
 
-  <!-- Modal for changing room status -->
-  <div id="statusModal" class="modal">
+  <!-- Single Actions Modal -->
+  <div id="actionModal" class="modal">
     <div class="modal-content">
-      <h3>Change In-Room Status</h3>
-      <p id="statusGuestName" class="info-line"></p>
-      <label for="statusSelect"><strong>Select new status:</strong></label>
-      <select id="statusSelect" class="status-select">
-        <option value="Checked In">Checked In</option>
-        <option value="Checked Out">Checked Out</option>
-        <option value="Scheduled Arrival">Scheduled Arrival</option>
-        <option value="Late Checkout">Late Checkout</option>
-        <option value="No-Show">No-Show</option>
-      </select>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
-        <button class="btn-save" onclick="saveRoomStatus()">Save</button>
-      </div>
-    </div>
-  </div>
+      <h3>Guest Actions</h3>
+      <p id="actionGuestName" class="info-line"></p>
 
-  <!-- Modal for editing guest details -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <h3>Edit Guest Details</h3>
-      <p id="editGuestName" class="info-line"></p>
+      <div class="edit-field">
+        <label for="actionStatus"><span class="modal-section-title">In-Room Status</span></label>
+        <select id="actionStatus">
+          <option value="Checked In">Checked In</option>
+          <option value="Checked Out">Checked Out</option>
+          <option value="Scheduled Arrival">Scheduled Arrival</option>
+          <option value="Late Checkout">Late Checkout</option>
+          <option value="No-Show">No-Show</option>
+        </select>
+      </div>
+
+      <p class="modal-section-title">Stay & Guest Info</p>
 
       <div class="edit-field">
         <label for="editRoom">Room Number</label>
@@ -348,8 +347,10 @@
       </div>
 
       <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-        <button class="btn-save" onclick="saveGuestEdits()">Save Changes</button>
+        <button class="btn-cancel" onclick="closeActionModal()">Close</button>
+        <button class="btn-secondary" onclick="reissueKeyFromModal()">Reissue Key</button>
+        <button class="btn-danger" onclick="checkOutFromModal()">Check Out</button>
+        <button class="btn-save" onclick="saveGuestActions()">Save Changes</button>
       </div>
     </div>
   </div>
@@ -407,7 +408,7 @@
         if (!g.billing) g.billing = "Paid in Full";
         if (!g.creditCard) g.creditCard = randomCard();
         if (!g.requests) g.requests = [];
-        if (!g.roomStatus) g.roomStatus = "Checked In"; // default for legacy guests
+        if (!g.roomStatus) g.roomStatus = "Checked In";
 
         g.requests = g.requests.map((r, index, arr) => {
           const baseCreated = Date.now() - (arr.length - index) * 1000;
@@ -437,8 +438,7 @@
     localStorage.setItem("guests", JSON.stringify(guests));
 
     const tableBody = document.getElementById("guestTableBody");
-    let activeStatusGuestIndex = null;
-    let activeEditGuestIndex = null;
+    let activeGuestIndex = null;
 
     function maskString(str) {
       if (!str) return "N/A";
@@ -466,15 +466,11 @@
             <span class="room-status-badge ${roomStatusClass(guest.roomStatus)}">
               ${guest.roomStatus}
             </span>
-            <br>
-            <button class="toggle-btn" onclick="openStatusModal(${gIndex})">Change Status</button>
           </td>
           <td>${guest.keyStatus}</td>
           <td>
             <button class="view-btn" onclick="toggleDetails(${gIndex})">View Details</button>
-            <button class="edit-btn" onclick="openEditModal(${gIndex})">Edit Guest</button>
-            <button class="checkout-btn" onclick="checkOutGuest(${gIndex})">Check Out</button>
-            <button class="rekey-btn" onclick="reissueKey(${gIndex})">Reissue Key</button>
+            <button class="action-btn" onclick="openActionModal(${gIndex})">Actions</button>
           </td>
         `;
 
@@ -489,7 +485,9 @@
                 .map(r => `
                   <li>
                     ${r.text}
-                    <span class="status-badge ${statusBadgeClass(r.status)}">${statusLabel(r.status)}</span>
+                    <span class="status-badge ${statusBadgeClass(r.status)}">
+                      ${statusLabel(r.status)}
+                    </span>
                     <span class="timestamp">${r.date}</span>
                   </li>
                 `)
@@ -549,64 +547,18 @@
       }
     }
 
-    // ===== ROOM STATUS MODAL =====
-    function openStatusModal(guestIndex) {
+    // ===== ACTION MODAL =====
+    function openActionModal(guestIndex) {
       guests = JSON.parse(localStorage.getItem("guests")) || [];
       guests = normalizeGuests(guests);
-      activeStatusGuestIndex = guestIndex;
+      activeGuestIndex = guestIndex;
 
       const guest = guests[guestIndex];
-      document.getElementById("statusGuestName").textContent =
+
+      document.getElementById("actionGuestName").textContent =
         `Guest: ${guest.name} (Room ${guest.room || "TBD"})`;
-      const select = document.getElementById("statusSelect");
-      select.value = guest.roomStatus || "Checked In";
 
-      document.getElementById("statusModal").style.display = "block";
-    }
-
-    function closeStatusModal() {
-      document.getElementById("statusModal").style.display = "none";
-      activeStatusGuestIndex = null;
-    }
-
-    function saveRoomStatus() {
-      if (activeStatusGuestIndex === null) return;
-
-      const select = document.getElementById("statusSelect");
-      const newStatus = select.value;
-
-      guests = JSON.parse(localStorage.getItem("guests")) || [];
-      guests = normalizeGuests(guests);
-
-      guests[activeStatusGuestIndex].roomStatus = newStatus;
-      localStorage.setItem("guests", JSON.stringify(guests));
-
-      // sync currentGuest
-      let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
-      if (currentGuest) {
-        const idx = guests.findIndex(
-          g => g.name === currentGuest.name && g.passcode === currentGuest.passcode
-        );
-        if (idx !== -1) {
-          currentGuest.roomStatus = guests[idx].roomStatus;
-          localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
-        }
-      }
-
-      closeStatusModal();
-      renderGuests();
-    }
-
-    // ===== EDIT MODAL =====
-    function openEditModal(guestIndex) {
-      guests = JSON.parse(localStorage.getItem("guests")) || [];
-      guests = normalizeGuests(guests);
-      activeEditGuestIndex = guestIndex;
-
-      const guest = guests[guestIndex];
-      document.getElementById("editGuestName").textContent =
-        `Editing: ${guest.name} (Room ${guest.room || "TBD"})`;
-
+      document.getElementById("actionStatus").value = guest.roomStatus || "Checked In";
       document.getElementById("editRoom").value = guest.room || "";
       document.getElementById("editGuestsInRoom").value = guest.guestsInRoom || 1;
       document.getElementById("editArrivalDate").value = guest.arrivalDate || "";
@@ -618,22 +570,23 @@
       document.getElementById("editBilling").value = guest.billing || "";
       document.getElementById("editNotes").value = guest.notes || "";
 
-      document.getElementById("editModal").style.display = "block";
+      document.getElementById("actionModal").style.display = "block";
     }
 
-    function closeEditModal() {
-      document.getElementById("editModal").style.display = "none";
-      activeEditGuestIndex = null;
+    function closeActionModal() {
+      document.getElementById("actionModal").style.display = "none";
+      activeGuestIndex = null;
     }
 
-    function saveGuestEdits() {
-      if (activeEditGuestIndex === null) return;
+    function saveGuestActions() {
+      if (activeGuestIndex === null) return;
 
       guests = JSON.parse(localStorage.getItem("guests")) || [];
       guests = normalizeGuests(guests);
 
-      const g = guests[activeEditGuestIndex];
+      const g = guests[activeGuestIndex];
 
+      const statusVal = document.getElementById("actionStatus").value;
       const roomVal = parseInt(document.getElementById("editRoom").value, 10);
       const guestsInRoomVal = parseInt(document.getElementById("editGuestsInRoom").value, 10);
       const arrivalVal = document.getElementById("editArrivalDate").value;
@@ -645,6 +598,7 @@
       const billingVal = document.getElementById("editBilling").value.trim();
       const notesVal = document.getElementById("editNotes").value.trim();
 
+      g.roomStatus = statusVal;
       if (!isNaN(roomVal)) g.room = roomVal;
       if (!isNaN(guestsInRoomVal) && guestsInRoomVal > 0) g.guestsInRoom = guestsInRoomVal;
       if (arrivalVal) g.arrivalDate = arrivalVal;
@@ -652,13 +606,13 @@
       g.vip = vipVal;
       g.hasPet = hasPetVal;
       g.earlyCheckInRequested = earlyVal;
-      g.parkingInfo = parkingVal || g.parkingInfo;
-      g.billing = billingVal || g.billing;
-      g.notes = notesVal || g.notes;
+      if (parkingVal) g.parkingInfo = parkingVal;
+      if (billingVal) g.billing = billingVal;
+      if (notesVal) g.notes = notesVal;
 
       localStorage.setItem("guests", JSON.stringify(guests));
 
-      // sync currentGuest as well
+      // Sync currentGuest
       let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
       if (currentGuest) {
         const idx = guests.findIndex(
@@ -670,19 +624,19 @@
         }
       }
 
-      closeEditModal();
+      closeActionModal();
       renderGuests();
     }
 
-    // ===== CHECK OUT GUEST =====
-    function checkOutGuest(guestIndex) {
+    // ===== CHECK OUT from modal =====
+    function checkOutFromModal() {
+      if (activeGuestIndex === null) return;
       if (!confirm("Mark this guest as Checked Out and complete all open requests?")) return;
 
       guests = JSON.parse(localStorage.getItem("guests")) || [];
       guests = normalizeGuests(guests);
 
-      const g = guests[guestIndex];
-
+      const g = guests[activeGuestIndex];
       g.roomStatus = "Checked Out";
       g.keyStatus = "Inactive";
 
@@ -701,7 +655,6 @@
 
       localStorage.setItem("guests", JSON.stringify(guests));
 
-      // sync currentGuest
       let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
       if (currentGuest &&
           currentGuest.name === g.name &&
@@ -712,21 +665,23 @@
         localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
       }
 
+      closeActionModal();
       renderGuests();
     }
 
-    // ===== REISSUE KEY =====
+    // ===== REISSUE KEY from modal =====
     function generateNewKey(room, passcode) {
       const randomSegment = Math.floor(1000 + Math.random() * 9000);
       return `GV-${room}-${passcode}-${randomSegment}`;
     }
 
-    function reissueKey(guestIndex) {
+    function reissueKeyFromModal() {
+      if (activeGuestIndex === null) return;
+
       guests = JSON.parse(localStorage.getItem("guests")) || [];
       guests = normalizeGuests(guests);
 
-      const g = guests[guestIndex];
-
+      const g = guests[activeGuestIndex];
       if (!g.room || !g.passcode) {
         alert("Cannot reissue key: missing room or passcode.");
         return;
@@ -738,7 +693,6 @@
 
       localStorage.setItem("guests", JSON.stringify(guests));
 
-      // sync currentGuest
       let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
       if (currentGuest &&
           currentGuest.name === g.name &&
@@ -752,15 +706,11 @@
       renderGuests();
     }
 
-    // Close modals when clicking outside
+    // Close modal when clicking outside
     window.onclick = function (event) {
-      const statusModal = document.getElementById("statusModal");
-      const editModal = document.getElementById("editModal");
-      if (event.target === statusModal) {
-        closeStatusModal();
-      }
-      if (event.target === editModal) {
-        closeEditModal();
+      const actionModal = document.getElementById("actionModal");
+      if (event.target === actionModal) {
+        closeActionModal();
       }
     };
 
@@ -768,4 +718,3 @@
   </script>
 </body>
 </html>
-
