@@ -5,6 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Prevent hyperlinks from showing blue/underlined */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .menu-section {
+      margin-top: 1.8rem;
+    }
+
+    .menu-title {
+      font-family: 'Playfair Display', serif;
+      color: #D4AF37;
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .menu-button {
+      width: 90%;
+      margin: 10px auto;
+      display: block;
+    }
+  </style>
 </head>
 
 <body>
@@ -13,38 +38,43 @@
   <header class="gv-header">
     <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
     <h1>Grand Vista Hotel</h1>
-    <p style="color:#555; font-size:1.1rem;">Welcome to the Training Simulation</p>
+    <p style="color:#555; font-size:1.1rem;">Training Simulation Portal</p>
   </header>
 
-  <!-- MAIN NAVIGATION CARD -->
-  <div class="page-box" style="max-width: 500px; text-align:center;">
-    <h2>Main Menu</h2>
-    <p>Select an option below:</p>
+  <!-- MAIN CARD -->
+  <div class="page-box" style="max-width: 480px; text-align:center; margin-top:2.5rem;">
 
-    <!-- GUEST OPTIONS -->
-    <h3 style="margin-top: 1.5rem;">Guest Services</h3>
+    <!-- GUEST SECTION -->
+    <div class="menu-section">
+      <h2 class="menu-title">Guest Services</h2>
 
-    <a href="guest_checkin.html">
-      <button class="btn" style="width: 90%; margin-top: 10px;">Guest Check-In</button>
-    </a>
+      <a href="guest_checkin.html">
+        <button class="btn menu-button">Guest Check-In</button>
+      </a>
 
-    <a href="guest_dashboard.html">
-      <button class="btn" style="width: 90%; margin-top: 10px;">Guest Dashboard</button>
-    </a>
+      <a href="guest_dashboard.html">
+        <button class="btn menu-button">Guest Dashboard</button>
+      </a>
+    </div>
 
-    <!-- EMPLOYEE OPTIONS -->
-    <h3 style="margin-top: 2rem;">Employee Services</h3>
+    <!-- EMPLOYEE SECTION -->
+    <div class="menu-section">
+      <h2 class="menu-title">Employee Access</h2>
 
-    <a href="employee_login.html">
-      <button class="btn" style="width: 90%; margin-top: 10px;">Employee Login</button>
-    </a>
+      <a href="employee_login.html">
+        <button class="btn menu-button">Employee Login</button>
+      </a>
+    </div>
 
-    <!-- TEAM OPTIONS -->
-    <h3 style="margin-top: 2rem;">Training Management</h3>
+    <!-- TEAM SECTION -->
+    <div class="menu-section">
+      <h2 class="menu-title">Training Management</h2>
 
-    <a href="team_login.html">
-      <button class="btn" style="width: 90%; margin-top: 10px;">Team Login</button>
-    </a>
+      <a href="team_login.html">
+        <button class="btn menu-button">Team Login</button>
+      </a>
+    </div>
+
   </div>
 
   <footer>
