@@ -1,50 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Room Service Request | Grand Vista Hotel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Room Service Board | Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css">
 
   <style>
-    .request-box {
-      max-width: 500px;
-      margin: 2rem auto;
+    body {
+      font-family: Arial, sans-serif;
+      background: #faf7ef;
+      margin: 0;
+      padding: 0;
+    }
+
+    .kanban-container {
+      display: flex;
+      justify-content: space-evenly;
       padding: 2rem;
+      gap: 1.5rem;
+    }
+
+    .kanban-column {
       background: white;
-      border-radius: 12px;
-      border: 2px solid #E8D7A9;
-      box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+      width: 30%;
+      padding: 1rem;
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(212,175,55,0.2);
+    }
+
+    .kanban-column h2 {
       text-align: center;
+      color: #d4af37;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
     }
 
-    textarea {
-      width: 90%;
-      padding: 10px;
+    .request-card {
+      background: #fffdfa;
+      border: 1px solid #e8d7a9;
       border-radius: 8px;
-      border: 1px solid #d4af37;
-      margin-top: 1rem;
-      resize: vertical;
+      padding: 0.7rem;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    select {
-      width: 90%;
-      padding: 10px;
-      border: 1px solid #d4af37;
-      border-radius: 6px;
-      margin-top: 1rem;
-      background-color: #fff;
+    .request-card strong {
+      display: block;
+      font-size: 1.1rem;
     }
 
-    .confirmation {
+    .timestamp {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .pending {
+      background: #fff3cd;
+      border: 1px solid #ffe58f;
+      color: #8a6d1d;
+    }
+
+    .in-progress {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+
+    .completed {
       background: #d4edda;
       border: 1px solid #c3e6cb;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-top: 20px;
-      display: none;
       color: #155724;
     }
+
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 6px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-progress {
+      background: #d1ecf1;
+    }
+
+    .btn-complete {
+      background: #d4edda;
+    }
+
+    .btn-reset {
+      background: #e8d7a9;
+      margin-top: 1rem;
+    }
+
   </style>
 </head>
 
@@ -52,39 +114,22 @@
 
 <header class="gv-header">
   <img src="V(1).png" alt="Logo" class="gv-logo">
-  <h1>Room Service Request</h1>
-  <p>How may we assist you today?</p>
+  <h1>Room Service Request Board</h1>
+  <p>Employee View of Guest Service Requests</p>
 </header>
 
-<div class="request-box">
-  <h2>Submit a Request</h2>
-
-  <select id="requestType" onchange="toggleOtherBox()">
-    <option value="">Select an option...</option>
-    <option value="Towels">Towels</option>
-    <option value="Toiletries">Toiletries</option>
-    <option value="Extra bedding">Extra bedding</option>
-    <option value="Room cleaning">Room cleaning</option>
-    <option value="Food delivery">Food delivery</option>
-    <option value="Technical assistance">Technical assistance</option>
-    <option value="Wake-up call">Wake-up call</option>
-    <option value="Other">Other</option>
-  </select>
-
-  <textarea id="otherText" placeholder="Please describe your request..."
-            style="display:none;"></textarea>
-
-  <button class="btn" style="margin-top:1rem;" onclick="submitRequest()">
-    Submit Request
-  </button>
-
-  <div id="confirmation" class="confirmation">
-    Request submitted successfully!
+<div class="kanban-container">
+  <div class="kanban-column" id="pendingCol">
+    <h2>Pending</h2>
   </div>
 
-  <a href="guest_dashboard.html">
-    <button class="btn" style="margin-top:1rem;">Back to Dashboard</button>
-  </a>
+  <div class="kanban-column" id="inProgressCol">
+    <h2>In Progress</h2>
+  </div>
+
+  <div class="kanban-column" id="completedCol">
+    <h2>Completed</h2>
+  </div>
 </div>
 
 <footer>
@@ -92,72 +137,70 @@
 </footer>
 
 <script>
-function toggleOtherBox() {
-  const type = document.getElementById("requestType").value;
-  const other = document.getElementById("otherText");
-  other.style.display = (type === "Other") ? "block" : "none";
+function loadRequests() {
+  const guests = JSON.parse(localStorage.getItem("guests")) || [];
+
+  const pendingCol = document.getElementById("pendingCol");
+  const inProgressCol = document.getElementById("inProgressCol");
+  const completedCol = document.getElementById("completedCol");
+
+  pendingCol.innerHTML = "<h2>Pending</h2>";
+  inProgressCol.innerHTML = "<h2>In Progress</h2>";
+  completedCol.innerHTML = "<h2>Completed</h2>";
+
+  guests.forEach((guest, gIndex) => {
+    (guest.requests || []).forEach((req, rIndex) => {
+      const card = document.createElement("div");
+      card.className = "request-card";
+
+      card.innerHTML = `
+        <strong>${req.text}</strong>
+        <span class="timestamp">${req.date}</span>
+        <span class="badge ${req.status}">${req.status}</span>
+        <p><em>Guest:</em> ${guest.name} (Room ${guest.room})</p>
+      `;
+
+      if (req.status === "pending") {
+        const btn = document.createElement("button");
+        btn.className = "btn-progress";
+        btn.textContent = "Mark In-Progress";
+        btn.onclick = () => updateStatus(gIndex, rIndex, "in-progress");
+        card.appendChild(btn);
+        pendingCol.appendChild(card);
+      }
+
+      if (req.status === "in-progress") {
+        const btn = document.createElement("button");
+        btn.className = "btn-complete";
+        btn.textContent = "Mark Completed";
+        btn.onclick = () => updateStatus(gIndex, rIndex, "completed");
+        card.appendChild(btn);
+        inProgressCol.appendChild(card);
+      }
+
+      if (req.status === "completed") {
+        completedCol.appendChild(card);
+      }
+    });
+  });
 }
 
-function submitRequest() {
-  const type = document.getElementById("requestType").value;
-  const other = document.getElementById("otherText").value.trim();
-
-  if (!type) {
-    alert("Please choose a request type.");
-    return;
-  }
-
-  const text = (type === "Other") ? other : type;
-  if (type === "Other" && !other) {
-    alert("Please describe your request.");
-    return;
-  }
-
+function updateStatus(gIndex, rIndex, status) {
   let guests = JSON.parse(localStorage.getItem("guests")) || [];
-  let guest = JSON.parse(localStorage.getItem("currentGuest"));
-  if (!guest) {
-    alert("No guest logged in.");
-    return;
+
+  guests[gIndex].requests[rIndex].status = status;
+  guests[gIndex].requests[rIndex].date =
+    new Date().toLocaleString();
+
+  if (status === "completed") {
+    guests[gIndex].requests[rIndex].completedAt = Date.now();
   }
 
-  // Build request object in the CORRECT format
-  const newRequest = {
-    text,
-    date: new Date().toLocaleString(),
-    status: "pending",
-    createdAt: Date.now(),
-    completedAt: null
-  };
-
-  // Add request to guest
-  guest.requests = guest.requests || [];
-  guest.requests.push(newRequest);
-
-  // Update guest list
-  guests = guests.map(g =>
-    g.name.toLowerCase() === guest.name.toLowerCase() &&
-    g.passcode === guest.passcode
-      ? guest
-      : g
-  );
-
-  // Save updates
   localStorage.setItem("guests", JSON.stringify(guests));
-  localStorage.setItem("currentGuest", JSON.stringify(guest));
-
-  // Show confirmation
-  document.getElementById("confirmation").style.display = "block";
-
-  // Hide confirmation after 2 seconds
-  setTimeout(() => {
-    document.getElementById("confirmation").style.display = "none";
-  }, 2000);
-
-  // Clear fields
-  document.getElementById("requestType").value = "";
-  document.getElementById("otherText").value = "";
-  document.getElementById("otherText").style.display = "none";
+  loadRequests();
 }
+
+loadRequests();
 </script>
 
 </body>
