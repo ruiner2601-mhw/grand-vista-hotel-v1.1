@@ -63,21 +63,18 @@
 
 <body>
 
-  <!-- AUTH CHECK -->
   <script>
     if (localStorage.getItem("employeeLoggedIn") !== "true") {
       window.location.href = "employee_login.html";
     }
   </script>
 
-  <!-- HEADER -->
   <header class="gv-header">
     <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
     <h1>Employee Portal</h1>
     <p>Welcome to the Grand Vista Management Suite</p>
   </header>
 
-  <!-- MAIN EMPLOYEE OPTIONS -->
   <div class="center-box">
     <a href="employee_guest_view.html" class="portal-btn">Guest Management</a>
     <a href="employee_room_service.html" class="portal-btn">Room Service Requests</a>
