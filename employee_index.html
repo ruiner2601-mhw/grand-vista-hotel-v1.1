@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Employee Dashboard – Grand Vista Hotel</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Employee Dashboard | Grand Vista Hotel</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="gv-header">
-    <h1>Employee Dashboard</h1>
-  </header>
 
-  <main class="home-links">
-    <ul>
-      <li><a href="employee_guest_view.html">Guest Check-Ins</a></li>
-      <li><a href="employee_requests_view.html">Room Service Requests</a></li>
-      <li><a href="employee_keygen.html">Key Generation Tool</a></li>
-      <li><a href="index.html">Return to Homepage</a></li>
-    </ul>
-  </main>
+<header class="gv-header">
+  <img src="V.png" style="height:100px; margin-bottom:1rem;">
+  <h1>Employee Dashboard</h1>
+</header>
+
+<main class="employee-menu">
+  <button onclick="location.href='employee_guest_view.html'">Guest Management</button>
+  <button onclick="location.href='employee_room_service.html'">Room Service Requests</button>
+  <button onclick="location.href='index.html'">Return to Home</button>
+</main>
+
 </body>
 </html>
