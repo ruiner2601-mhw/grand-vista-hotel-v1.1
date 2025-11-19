@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Room Service Management | Grand Vista Hotel</title>
   <link rel="stylesheet" href="style.css">
-
   <style>
     body {
       background: #fff;
@@ -56,6 +55,11 @@
       margin-top: 0.4rem;
     }
 
+    .expires {
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+    }
+
     .action-btns {
       margin-top: 0.6rem;
     }
@@ -74,9 +78,7 @@
     .btn-complete { background: #d4edda; }
   </style>
 </head>
-
 <body>
-
 <header class="gv-header">
   <img src="V.png" style="height:100px; margin-bottom:1rem;">
   <h1>Room Service Requests</h1>
@@ -84,31 +86,98 @@
 </header>
 
 <div class="kanban-container">
-  
-  <!-- Pending Column -->
   <div class="kanban-column">
     <h2>Pending</h2>
     <div id="pendingCol"></div>
   </div>
-
-  <!-- In Progress Column -->
   <div class="kanban-column">
     <h2>In Progress</h2>
     <div id="progressCol"></div>
   </div>
-
-  <!-- Completed Column -->
   <div class="kanban-column">
     <h2>Completed</h2>
     <div id="completedCol"></div>
   </div>
-
 </div>
 
 <script>
+  const TEN_MINUTES_MS = 10 * 60 * 1000;
+
+  function normalizeGuests(data) {
+    return data.map(g => {
+      if (!g.requests) g.requests = [];
+      g.requests = g.requests.map((r, index, arr) => {
+        const baseCreated = Date.now() - (arr.length - index) * 1000;
+        if (typeof r === "string") {
+          return {
+            text: r,
+            date: new Date().toLocaleString(),
+            status: "pending",
+            createdAt: baseCreated,
+            completedAt: null
+          };
+        }
+        if (!r.text) r.text = "Unknown request";
+        if (!r.date) r.date = new Date().toLocaleString();
+        if (!r.status) r.status = "pending";
+        if (!r.createdAt) r.createdAt = baseCreated;
+        if (r.status !== "completed") r.completedAt = null;
+        return r;
+      });
+      return g;
+    });
+  }
+
+  function pruneCompleted(guests) {
+    const now = Date.now();
+    guests.forEach(g => {
+      if (!g.requests) return;
+      g.requests = g.requests.filter(r => {
+        if (r.status === "completed") {
+          if (!r.completedAt) r.completedAt = now;
+          const age = now - r.completedAt;
+          if (age > TEN_MINUTES_MS) {
+            return false; // auto-delete
+          }
+        }
+        return true;
+      });
+    });
+  }
+
   let guests = JSON.parse(localStorage.getItem("guests")) || [];
+  guests = normalizeGuests(guests);
+
+  function saveGuests() {
+    localStorage.setItem("guests", JSON.stringify(guests));
+  }
+
+  function syncCurrentGuest() {
+    let current = JSON.parse(localStorage.getItem("currentGuest"));
+    if (!current) return;
+    const idx = guests.findIndex(
+      g => g.name === current.name && g.passcode === current.passcode
+    );
+    if (idx !== -1) {
+      current.requests = guests[idx].requests;
+      localStorage.setItem("currentGuest", JSON.stringify(current));
+    }
+  }
+
+  function formatCountdown(msRemaining) {
+    const totalSeconds = Math.max(0, Math.floor(msRemaining / 1000));
+    const mm = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+    const ss = String(totalSeconds % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }
 
   function updateAll() {
+    guests = JSON.parse(localStorage.getItem("guests")) || [];
+    guests = normalizeGuests(guests);
+    pruneCompleted(guests);
+    saveGuests();
+    syncCurrentGuest();
+
     const pendingCol = document.getElementById("pendingCol");
     const progressCol = document.getElementById("progressCol");
     const completedCol = document.getElementById("completedCol");
@@ -117,52 +186,98 @@
     progressCol.innerHTML = "";
     completedCol.innerHTML = "";
 
+    const pending = [];
+    const inProgress = [];
+    const completed = [];
+    const now = Date.now();
+
     guests.forEach((guest, gIndex) => {
-      if (!guest.requests) return;
-
       guest.requests.forEach((req, rIndex) => {
-        const card = document.createElement("div");
-        card.className = "kanban-card";
-
-        card.innerHTML = `
-          <strong>Guest:</strong> ${guest.name}<br>
-          <strong>Room:</strong> ${guest.room}<br>
-          <strong>Request:</strong> ${req.text}<br>
-          <span class="timestamp">${req.date}</span>
-
-          <div class="action-btns">
-            <button class="btn-pending" onclick="setStatus(${gIndex}, ${rIndex}, 'pending')">Pending</button>
-            <button class="btn-progress" onclick="setStatus(${gIndex}, ${rIndex}, 'in-progress')">In Progress</button>
-            <button class="btn-complete" onclick="setStatus(${gIndex}, ${rIndex}, 'completed')">Completed</button>
-          </div>
-        `;
-
-        if (req.status === "pending") pendingCol.appendChild(card);
-        else if (req.status === "in-progress") progressCol.appendChild(card);
-        else completedCol.appendChild(card);
+        const item = { guestIndex: gIndex, requestIndex: rIndex, guest, req };
+        if (req.status === "pending") pending.push(item);
+        else if (req.status === "in-progress") inProgress.push(item);
+        else if (req.status === "completed") completed.push(item);
       });
+    });
+
+    // FIFO for pending & in-progress
+    pending.sort((a, b) => a.req.createdAt - b.req.createdAt);
+    inProgress.sort((a, b) => a.req.createdAt - b.req.createdAt);
+    // Completed: newest first
+    completed.sort((a, b) => b.req.createdAt - a.req.createdAt);
+
+    pending.forEach(item => {
+      const card = createCard(item, now);
+      pendingCol.appendChild(card);
+    });
+
+    inProgress.forEach(item => {
+      const card = createCard(item, now);
+      progressCol.appendChild(card);
+    });
+
+    completed.forEach(item => {
+      const card = createCard(item, now);
+      completedCol.appendChild(card);
     });
   }
 
-  function setStatus(guestIndex, requestIndex, newStatus) {
-    guests[guestIndex].requests[requestIndex].status = newStatus;
-    localStorage.setItem("guests", JSON.stringify(guests));
+  function createCard(item, now) {
+    const { guestIndex, requestIndex, guest, req } = item;
+    const card = document.createElement("div");
+    card.className = "kanban-card";
 
-    let currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
-    if (
-      currentGuest &&
-      currentGuest.name === guests[guestIndex].name &&
-      currentGuest.passcode === guests[guestIndex].passcode
-    ) {
-      currentGuest.requests = guests[guestIndex].requests;
-      localStorage.setItem("currentGuest", JSON.stringify(currentGuest));
+    let countdownHTML = "";
+    if (req.status === "completed" && req.completedAt) {
+      const elapsed = now - req.completedAt;
+      const remaining = TEN_MINUTES_MS - elapsed;
+      if (remaining > 0) {
+        const timeStr = formatCountdown(remaining);
+        const color = remaining <= 60000 ? "#cc0000" : "#d4af37";
+        countdownHTML = `
+          <div class="expires" style="color:${color};">
+            Expires in: ${timeStr}
+          </div>
+        `;
+      }
     }
 
+    card.innerHTML = `
+      <strong>Guest:</strong> ${guest.name}<br>
+      <strong>Room:</strong> ${guest.room}<br>
+      <strong>Request:</strong> ${req.text}<br>
+      <span class="timestamp">${req.date}</span>
+      ${countdownHTML}
+      <div class="action-btns">
+        <button class="btn-pending" onclick="setStatus(${guestIndex}, ${requestIndex}, 'pending')">Pending</button>
+        <button class="btn-progress" onclick="setStatus(${guestIndex}, ${requestIndex}, 'in-progress')">In Progress</button>
+        <button class="btn-complete" onclick="setStatus(${guestIndex}, ${requestIndex}, 'completed')">Completed</button>
+      </div>
+    `;
+    return card;
+  }
+
+  function setStatus(guestIndex, requestIndex, newStatus) {
+    guests = JSON.parse(localStorage.getItem("guests")) || [];
+    guests = normalizeGuests(guests);
+
+    const req = guests[guestIndex].requests[requestIndex];
+    req.status = newStatus;
+    if (newStatus === "completed") {
+      req.completedAt = Date.now();
+      req.date = new Date().toLocaleString(); // update visible date to completion time
+    } else {
+      req.completedAt = null;
+    }
+
+    saveGuests();
+    syncCurrentGuest();
     updateAll();
   }
 
+  // Initial render and live countdown + cleanup
   updateAll();
+  setInterval(updateAll, 1000);
 </script>
-
 </body>
 </html>
