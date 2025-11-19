@@ -8,13 +8,22 @@
 
   <style>
     .dashboard-box {
-      max-width: 700px;
+      max-width: 750px;
       margin: 2rem auto;
       background: white;
       border: 2px solid #E8D7A9;
       border-radius: 12px;
       padding: 2rem;
       box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      color: #d4af37;
+      border-bottom: 2px solid #f1e6c9;
+      padding-bottom: 4px;
+      margin-top: 1.5rem;
+      margin-bottom: 0.7rem;
     }
 
     .badge {
@@ -35,6 +44,12 @@
       color: #333;
     }
 
+    .info-sub {
+      font-size: 0.95rem;
+      color: #555;
+      margin: 2px 0;
+    }
+
     .request-box {
       background: #fffdf5;
       border: 1px solid #e8d7a9;
@@ -51,41 +66,15 @@
       margin-left: 8px;
     }
 
-    .status-pending {
-      background: #fff3cd;
-      border: 1px solid #ffe58f;
-      color: #8a6d1d;
-    }
-
-    .status-in-progress {
-      background: #d1ecf1;
-      border: 1px solid #bee5eb;
-      color: #0c5460;
-    }
-
-    .status-completed {
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-    }
+    .status-pending { background:#fff3cd; border:1px solid #ffe58f; color:#8a6d1d; }
+    .status-in-progress { background:#d1ecf1; border:1px solid #bee5eb; color:#0c5460; }
+    .status-completed { background:#d4edda; border:1px solid #c3e6cb; color:#155724; }
 
     .timestamp {
       font-size: 0.85rem;
       color: #666;
       display: block;
       margin-top: 4px;
-    }
-
-    /* Checkout banner */
-    .checkout-banner {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-weight: bold;
-      text-align: center;
     }
 
     /* Request Form */
@@ -113,26 +102,26 @@
       transition: 0.2s;
     }
 
-    button:hover {
-      background: #e5c864;
-    }
+    button:hover { background: #e5c864; }
   </style>
 </head>
 
 <body>
-<header class="gv-header">
-  <img src="V(1).png" alt="Logo" class="gv-logo">
-  <h1 id="guestNameHeader">Guest Dashboard</h1>
-</header>
+  <header class="gv-header">
+    <img src="V(1).png" alt="Logo" class="gv-logo">
+    <h1 id="guestNameHeader">Guest Dashboard</h1>
+  </header>
 
-<div class="dashboard-box" id="guestInfo"></div>
+  <div class="dashboard-box" id="guestInfo"></div>
 
-<footer>
-  <p>&copy; 2025 Grand Vista Hotel</p>
-</footer>
+  <footer>
+    <p>&copy; 2025 Grand Vista Hotel</p>
+  </footer>
 
 <script>
-/* Auto-delete completed requests older than 5 minutes */
+/* ---------------------------------------------------------
+   AUTO DELETE COMPLETED REQUESTS > 5 MINUTES OLD
+--------------------------------------------------------- */
 function autoDeleteOldRequests(guest) {
   const FIVE_MIN = 5 * 60 * 1000;
   const now = Date.now();
@@ -147,6 +136,9 @@ function autoDeleteOldRequests(guest) {
   return guest;
 }
 
+/* ---------------------------------------------------------
+   LOAD DASHBOARD
+--------------------------------------------------------- */
 function loadGuestDashboard() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   if (!guest) {
@@ -155,15 +147,11 @@ function loadGuestDashboard() {
     return;
   }
 
-  const isCheckedOut = guest.roomStatus === "Checked Out";
-
-  // Cleanup old requests
+  // Auto cleanup
   guest = autoDeleteOldRequests(guest);
-
-  // Save cleanup
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
-  // Sync to main guest list
+  // Save cleanup to global list
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
   const idx = allGuests.findIndex(g => g.name === guest.name && g.passcode === guest.passcode);
   if (idx !== -1) {
@@ -171,6 +159,7 @@ function loadGuestDashboard() {
     localStorage.setItem("guests", JSON.stringify(allGuests));
   }
 
+  // Greeting
   document.getElementById("guestNameHeader").textContent = `Welcome, ${guest.name}!`;
 
   // Badges
@@ -183,8 +172,9 @@ function loadGuestDashboard() {
   // Mask key
   const maskedKey = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
 
-  // Request history (newest to oldest)
-  const sortedRequests = (guest.requests || []).sort((a, b) => b.createdAt - a.createdAt);
+  // Request history
+  const sortedRequests = (guest.requests || [])
+    .sort((a, b) => b.createdAt - a.createdAt);
 
   const requestsHTML =
     sortedRequests.length === 0
@@ -199,38 +189,12 @@ function loadGuestDashboard() {
           </div>
         `).join("");
 
-  /* If the guest is checked out, hide request form and show message. */
-  const checkoutNotice = isCheckedOut
-    ? `<div class="checkout-banner">You are checked out. No new service requests can be submitted.</div>`
-    : "";
-
-  const requestSection = isCheckedOut
-    ? ""  
-    : `
-      <h3>Create a New Service Request</h3>
-
-      <div class="request-form">
-        <select id="requestType">
-          <option value="">Select a Request</option>
-          <option>Towels</option>
-          <option>Toiletries</option>
-          <option>Extra Pillows</option>
-          <option>Blankets</option>
-          <option>Food Delivery</option>
-          <option>Wake-Up Call</option>
-          <option>Other</option>
-        </select>
-
-        <input id="otherRequest" style="display:none;" placeholder="Describe your request...">
-
-        <button onclick="submitRequest()">Submit Request</button>
-      </div>
-    `;
-
+  /* ---------------------------------------------------------
+      FULL PAGE HTML OUTPUT
+  --------------------------------------------------------- */
   document.getElementById("guestInfo").innerHTML = `
-    ${checkoutNotice}
+    <h2 class="section-title">Your Stay Information</h2>
 
-    <h2>Your Stay Information</h2>
     ${badges}
 
     <p class="info-line"><strong>Room Number:</strong> ${guest.room}</p>
@@ -240,19 +204,42 @@ function loadGuestDashboard() {
     <p class="info-line"><strong>Departure Date:</strong> ${guest.departureDate}</p>
     <p class="info-line"><strong>Notes:</strong> ${guest.notes}</p>
 
-    <br>
-
-    <h3>Your Digital Key</h3>
+    <h2 class="section-title">Your Digital Key</h2>
     <p>
-      <span id="keyValue">${isCheckedOut ? "Inactive" : maskedKey}</span>
-      ${!isCheckedOut ? `<button onclick="toggleKey()">Show</button>` : ""}
+      <span id="keyValue">${maskedKey}</span>
+      <button onclick="toggleKey()">Show</button>
     </p>
 
-    <br>
+    <h2 class="section-title">Hotel Information</h2>
+    <p class="info-sub"><strong>Wi-Fi Network:</strong> GrandVista_Guest</p>
+    <p class="info-sub"><strong>Wi-Fi Password:</strong> StayGolden2025</p>
+    <p class="info-sub"><strong>Check-In Time:</strong> 3:00 PM</p>
+    <p class="info-sub"><strong>Check-Out Time:</strong> 11:00 AM</p>
+    <p class="info-sub"><strong>Housekeeping:</strong> 8:00 AM – 6:00 PM</p>
+    <p class="info-sub"><strong>Room Service:</strong> 6:30 AM – 11:30 PM</p>
+    <p class="info-sub"><strong>Spa:</strong> 9:00 AM – 8:00 PM</p>
+    <p class="info-sub"><strong>Restaurant:</strong> 7:00 AM – 10:00 PM</p>
 
-    ${requestSection}
+    <h2 class="section-title">Create a New Service Request</h2>
 
-    <h3>Your Service Requests</h3>
+    <div class="request-form">
+      <select id="requestType">
+        <option value="">Select a Request</option>
+        <option>Towels</option>
+        <option>Toiletries</option>
+        <option>Extra Pillows</option>
+        <option>Blankets</option>
+        <option>Food Delivery</option>
+        <option>Wake-Up Call</option>
+        <option>Other</option>
+      </select>
+
+      <input id="otherRequest" style="display:none;" placeholder="Describe your request...">
+
+      <button onclick="submitRequest()">Submit Request</button>
+    </div>
+
+    <h2 class="section-title">Your Service Requests</h2>
     ${requestsHTML}
   `;
 }
@@ -261,7 +248,6 @@ function toggleKey() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
   const current = keySpan.textContent;
-
   keySpan.textContent = current.startsWith("****")
     ? guest.key
     : "****" + guest.key.slice(-4);
@@ -295,6 +281,7 @@ function submitRequest() {
 
   guest.requests.push(newReq);
 
+  // Save
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
@@ -307,7 +294,7 @@ function submitRequest() {
   location.reload();
 }
 
-document.addEventListener("change", function (e) {
+document.addEventListener("change", function(e) {
   if (e.target.id === "requestType") {
     document.getElementById("otherRequest").style.display =
       e.target.value === "Other" ? "block" : "none";
@@ -316,5 +303,6 @@ document.addEventListener("change", function (e) {
 
 loadGuestDashboard();
 </script>
+
 </body>
 </html>
