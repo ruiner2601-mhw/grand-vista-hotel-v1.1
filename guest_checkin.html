@@ -74,6 +74,15 @@ function randomNote() {
   return notes[Math.floor(Math.random() * notes.length)];
 }
 
+// Random departure date 1–7 days after arrival
+function randomDepartureDate() {
+  const today = new Date();
+  const offset = Math.floor(Math.random() * 7) + 1; // 1–7 days
+  const departure = new Date(today);
+  departure.setDate(today.getDate() + offset);
+  return departure.toISOString().split("T")[0];
+}
+
 /* --------------------------------------
    MAIN CHECK-IN / LOGIN LOGIC
 --------------------------------------- */
@@ -94,16 +103,14 @@ function checkInGuest() {
 
   let guests = JSON.parse(localStorage.getItem("guests")) || [];
 
-  /* --------------------------------------
-     CLEAN SAMPLE GUEST DATA (fix undefined)
-  --------------------------------------- */
+  // Fix undefined guest counts
   guests = guests.map(g => ({
     ...g,
     guestsInRoom: g.guestsInRoom || Math.floor(Math.random() * 4) + 1
   }));
 
   /* --------------------------------------
-     STEP 1 — CHECK IF GUEST EXISTS (LOGIN)
+     STEP 1 — EXISTING GUEST LOGIN
   --------------------------------------- */
   let existingGuest = guests.find(
     g => g.name.toLowerCase() === name.toLowerCase() &&
@@ -111,7 +118,7 @@ function checkInGuest() {
   );
 
   if (existingGuest) {
-    // Upgrade status for existing guest
+
     existingGuest.roomStatus = "Checked In";
 
     if (!existingGuest.key) {
@@ -120,7 +127,6 @@ function checkInGuest() {
 
     existingGuest.keyStatus = "Active";
 
-    // Save updated guest list
     guests = guests.map(g =>
       g.name.toLowerCase() === existingGuest.name.toLowerCase() &&
       g.passcode === existingGuest.passcode
@@ -155,7 +161,7 @@ function checkInGuest() {
     guestsInRoom,
     roomStatus: "Checked In",
     arrivalDate: today,
-    departureDate: "TBD",
+    departureDate: randomDepartureDate(),  // ✔ FIXED HERE
     key: `GV-${room}-${passcode}`,
     keyStatus: "Active",
     parkingInfo: "No Vehicle",
@@ -177,7 +183,6 @@ function checkInGuest() {
   localStorage.setItem("guests", JSON.stringify(guests));
   localStorage.setItem("currentGuest", JSON.stringify(newGuest));
 
-  // Redirect
   window.location.href = "guest_dashboard.html";
 }
 </script>
