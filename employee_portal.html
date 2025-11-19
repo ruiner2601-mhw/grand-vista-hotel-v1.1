@@ -1,97 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Employee Portal | Grand Vista Hotel</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #faf7ef;
-      margin: 0;
-      padding: 0;
-    }
-
-    .center-box {
-      max-width: 420px;
-      margin: 3rem auto;
-      padding: 2rem;
-      background: white;
-      border-radius: 14px;
-      border: 2px solid #d4af37;
-      box-shadow: 0 4px 20px rgba(212,175,55,0.25);
-      text-align: center;
-    }
-
-    .portal-btn {
-      display: block;
-      width: 100%;
-      padding: 1rem;
-      margin: 1rem 0;
-      background: #d4af37;
-      color: white;
-      font-size: 1.1rem;
-      font-weight: bold;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      transition: 0.2s;
-      text-decoration: none;
-    }
-
-    .portal-btn:hover {
-      background: #e6c86d;
-      transform: scale(1.03);
-    }
-
-    .gv-logo {
-      height: 100px;
-      margin-bottom: 1.5rem;
-    }
-
-    .logout-btn {
-      margin-top: 1.5rem;
-      color: #b30000;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <script>
-  /* Prevent unauthorized access */
-  if (localStorage.getItem("employeeLoggedIn") !== "true") {
-    window.location.href = "employee_login.html";
-  }
+// Block access if not logged in
+if (localStorage.getItem("employeeLoggedIn") !== "true") {
+  window.location.href = "employee_login.html";
+}
 </script>
 
 <header class="gv-header">
-  <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
-  <h1>Employee Portal</h1>
-  <p>Welcome to the Grand Vista Management Suite</p>
+  <img src="V(1).png" class="gv-logo">
+  <h1>Employee Dashboard</h1>
 </header>
 
-<div class="center-box">
+<div style="text-align:center; margin-top:2rem;">
+  <a href="employee_board.html" class="portal-btn">Guest Management Board</a>
 
-  <a href="employee_guest_management.html" class="portal-btn">Guest Management</a>
-  <a href="employee_room_service.html" class="portal-btn">Room Service Requests</a>
-
-  <p class="logout-btn" onclick="logout()">Log Out</p>
+  <button class="portal-btn" onclick="logout()">Log Out</button>
 </div>
-
-<footer>
-  <p>&copy; 2025 Grand Vista Hotel</p>
-</footer>
 
 <script>
 function logout() {
   localStorage.removeItem("employeeLoggedIn");
-  window.location.href = "employee_login.html";
+  window.location.href = "index.html";
 }
 </script>
 
