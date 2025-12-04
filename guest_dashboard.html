@@ -77,6 +77,7 @@
       margin-top: 4px;
     }
 
+    /* Request Form */
     .request-form {
       padding: 1rem;
       background: #fffdf7;
@@ -100,14 +101,89 @@
       cursor: pointer;
       transition: 0.2s;
     }
-
     button:hover { background: #e5c864; }
+
+    /* Smaller logo */
+    .gv-logo {
+      height: 100px !important;
+    }
+
+    /* Chatbot styles */
+    #vistaChatBtn {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      background: #d4af37;
+      color: white;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      z-index: 9999;
+    }
+
+    #vistaChatWindow {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 320px;
+      height: 430px;
+      background: white;
+      border: 2px solid #d4af37;
+      border-radius: 10px;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      z-index: 9999;
+    }
+
+    #vistaChatHeader {
+      background: #d4af37;
+      color: white;
+      padding: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    #vistaChatMessages {
+      flex-grow: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+    }
+
+    #vistaChatInputBox {
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      display: flex;
+      gap: 5px;
+    }
+
+    #vistaChatInput {
+      flex-grow: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    #vistaChatSend {
+      padding: 8px 12px;
+      background: #d4af37;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
   <header class="gv-header">
-    <img src="V(1).png" alt="Logo" class="gv-logo" style="height:100px; margin-bottom:1rem;">
+    <img src="V(1).png" alt="Logo" class="gv-logo">
     <h1 id="guestNameHeader">Guest Dashboard</h1>
   </header>
 
@@ -117,6 +193,80 @@
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
 
+<!-- ==========================================================
+     CHATBOT WIDGET
+========================================================== -->
+<button id="vistaChatBtn" onclick="toggleVistaChat()">💬</button>
+
+<div id="vistaChatWindow">
+  <div id="vistaChatHeader">Vista AI Assistant</div>
+
+  <div id="vistaChatMessages"></div>
+
+  <div id="vistaChatInputBox">
+    <input id="vistaChatInput" type="text" placeholder="Ask Vista..." />
+    <button id="vistaChatSend" onclick="sendVistaMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+function toggleVistaChat() {
+  const box = document.getElementById("vistaChatWindow");
+  box.style.display = box.style.display === "flex" ? "none" : "flex";
+}
+
+function sendVistaMessage() {
+  const input = document.getElementById("vistaChatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  addChatMessage("guest", msg);
+  input.value = "";
+
+  handleVistaAI(msg);
+}
+
+function addChatMessage(sender, text) {
+  const box = document.getElementById("vistaChatMessages");
+  const div = document.createElement("div");
+  div.style.margin = "6px 0";
+
+  div.innerHTML =
+    sender === "guest"
+      ? `<div style="text-align:right;"><strong>You:</strong> ${text}</div>`
+      : `<div><strong>Vista:</strong> ${text}</div>`;
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+/* AI BEHAVIOR */
+function handleVistaAI(message) {
+  let guest = JSON.parse(localStorage.getItem("currentGuest"));
+
+  // Simple examples (can add MUCH more)
+  if (/wifi|internet/i.test(message)) {
+    addChatMessage("ai", "Our Wi-Fi network is <strong>GrandVista_Guest</strong> and the password is <strong>StayGolden2025</strong>.");
+    return;
+  }
+
+  if (/key|digital/i.test(message)) {
+    addChatMessage("ai", `Your digital key is: <strong>${guest.key}</strong>.`);
+    return;
+  }
+
+  if (/request|towel|pillows|blanket/i.test(message)) {
+    addChatMessage("ai", "To create a new service request, scroll to the 'New Service Request' section of this page!");
+    return;
+  }
+
+  addChatMessage("ai", "I'm here to help! You can ask about Wi-Fi, digital keys, room requests, hotel services, and more.");
+}
+</script>
+
+<!-- ==========================================================
+     ORIGINAL GUEST DASHBOARD LOGIC
+========================================================== -->
 <script>
 function autoDeleteOldRequests(guest) {
   const FIVE_MIN = 5 * 60 * 1000;
@@ -167,14 +317,12 @@ function loadGuestDashboard() {
     sortedRequests.length === 0
       ? `<p>No requests submitted yet.</p>`
       : sortedRequests.map(r => `
-          <div class="request-box">
-            <strong>${r.text}</strong>
-            <span class="request-status status-${r.status}">
-              ${r.status.replace("-", " ")}
-            </span>
-            <span class="timestamp">${r.date}</span>
-          </div>
-        `).join("");
+        <div class="request-box">
+          <strong>${r.text}</strong>
+          <span class="request-status status-${r.status}">${r.status}</span>
+          <span class="timestamp">${r.date}</span>
+        </div>
+      `).join("");
 
   document.getElementById("guestInfo").innerHTML = `
     <h2 class="section-title">Your Stay Information</h2>
@@ -195,14 +343,13 @@ function loadGuestDashboard() {
     </p>
 
     <h2 class="section-title">Hotel Information</h2>
-    <p class="info-sub"><strong>Wi-Fi Network:</strong> GrandVista_Guest</p>
-    <p class="info-sub"><strong>Wi-Fi Password:</strong> StayGolden2025</p>
-    <p class="info-sub"><strong>Check-In Time:</strong> 3:00 PM</p>
-    <p class="info-sub"><strong>Check-Out Time:</strong> 11:00 AM</p>
-    <p class="info-sub"><strong>Housekeeping:</strong> 8:00 AM – 6:00 PM</p>
+    <p class="info-sub"><strong>Wi-Fi:</strong> GrandVista_Guest / StayGolden2025</p>
+    <p class="info-sub"><strong>Check-In:</strong> 3:00 PM</p>
+    <p class="info-sub"><strong>Check-Out:</strong> 11:00 AM</p>
+    <p class="info-sub"><strong>Housekeeping:</strong> 8 AM – 6 PM</p>
     <p class="info-sub"><strong>Room Service:</strong> 6:30 AM – 11:30 PM</p>
-    <p class="info-sub"><strong>Spa:</strong> 9:00 AM – 8:00 PM</p>
-    <p class="info-sub"><strong>Restaurant:</strong> 7:00 AM – 10:00 PM</p>
+    <p class="info-sub"><strong>Spa:</strong> 9 AM – 8 PM</p>
+    <p class="info-sub"><strong>Restaurant:</strong> 7 AM – 10 PM</p>
 
     <h2 class="section-title">Create a New Service Request</h2>
 
@@ -231,7 +378,9 @@ function loadGuestDashboard() {
 function toggleKey() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
-  keySpan.textContent = keySpan.textContent.startsWith("****")
+  const current = keySpan.textContent;
+
+  keySpan.textContent = current.startsWith("****")
     ? guest.key
     : "****" + guest.key.slice(-4);
 }
