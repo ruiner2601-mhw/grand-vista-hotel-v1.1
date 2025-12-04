@@ -56,122 +56,122 @@
       color: #333;
     }
 
-    /* =========================
-       VISTA AI CHAT WIDGET — Improved
-       ========================= */
-    .vista-chat-toggle {
+    /* CHATBOX */
+    #chatButton {
       position: fixed;
-      right: 20px;
-      bottom: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      bottom: 25px;
+      right: 25px;
       background: #d4af37;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 65px;
+      height: 65px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-      z-index: 9998;
+      font-size: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    .vista-chat-panel {
-      position: fixed;
-      right: 20px;
-      bottom: 90px;
-      width: 340px;
-      max-height: 460px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      border: 2px solid #d4af37;
+    #chatContainer {
       display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 9999;
-      font-size: 0.9rem;
-      text-align: left;
+      position: fixed;
+      bottom: 100px;
+      right: 25px;
+      width: 320px;
+      background: white;
+      border-radius: 12px;
+      border: 2px solid #d4af37;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     }
 
-    .vista-chat-header {
-      background: #faf3dc;
-      padding: 0.6rem 0.8rem;
-      border-bottom: 1px solid #e5d5aa;
+    #chatHeader {
+      background: #d4af37;
+      color: white;
+      padding: 10px;
+      border-radius: 10px 10px 0 0;
+      font-weight: bold;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .vista-chat-close {
+    #closeChat {
       background: none;
       border: none;
-      font-size: 0.9rem;
+      color: white;
+      font-size: 18px;
       cursor: pointer;
-      color: #7a5a16;
-      opacity: 0.7;
     }
-    .vista-chat-close:hover { opacity: 1; }
 
-    .vista-chat-messages {
-      flex: 1;
-      padding: 0.7rem;
+    #chatMessages {
+      height: 260px;
       overflow-y: auto;
-      background: #fffbf1;
+      padding: 10px;
+      font-size: 0.9rem;
     }
 
-    .vista-chat-input-row {
-      display: flex;
-      border-top: 1px solid #e5d5aa;
-      background: #fdf7e7;
-      padding: 0.5rem;
-      align-items: center;
+    .chat {
+      margin: 6px 0;
+      padding: 8px 10px;
+      border-radius: 6px;
+      max-width: 85%;
     }
 
-    .vista-chat-input-row input {
-      flex: 1;
-      padding: 0.55rem 0.7rem;
-      border-radius: 8px;
+    .chat.user {
+      background: #e8d7a9;
+      margin-left: auto;
+    }
+
+    .chat.ai {
+      background: #fff3cd;
+      margin-right: auto;
+    }
+
+    #chatInput {
+      width: 85%;
+      padding: 10px;
       border: 1px solid #d4af37;
-      font-size: 0.92rem;
+      border-radius: 8px;
+      margin: 8px;
     }
 
-    .vista-chat-input-row button {
-      margin-left: 0.4rem;
-      padding: 0.45rem 0.6rem;
-      border-radius: 8px;
-      border: none;
+    #sendChat {
+      width: 50px;
+      padding: 8px;
       background: #d4af37;
-      color: #fff;
+      border-radius: 8px;
+      color: white;
       cursor: pointer;
-      font-size: 0.85rem;
-    }
-    .vista-chat-input-row button:hover {
-      background: #e6c864;
+      border: none;
     }
   </style>
 </head>
 
 <body>
 
+  <!-- HEADER -->
   <header class="gv-header">
-    <img src="V(1).png" class="gv-logo">
+    <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
     <h1>Grand Vista Hotel</h1>
     <p>Your Digital Check-In Experience</p>
   </header>
 
+  <!-- GUEST SECTION -->
   <div class="section-box">
     <h2>Guest Access</h2>
+
     <a href="guest_checkin.html" class="portal-btn">Guest Check-In</a>
+
     <div id="continueGuestContainer"></div>
   </div>
 
+  <!-- EMPLOYEE SECTION -->
   <div class="section-box">
     <h2>Employee Portal</h2>
     <a href="employee_login.html" class="portal-btn">Employee Login</a>
   </div>
 
+  <!-- PROJECT TEAM SECTION -->
   <div class="section-box">
     <h2>Project Team Access</h2>
     <a href="team_login.html" class="portal-btn">Project Team Login</a>
@@ -181,50 +181,72 @@
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
 
-  <script>
-    const currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
-    const container = document.getElementById("continueGuestContainer");
+  <!-- CHATBUTTON -->
+  <button id="chatButton">💬</button>
 
-    if (currentGuest) {
-      container.innerHTML = `
-        <a href="guest_dashboard.html" class="portal-btn">
-          Continue as ${currentGuest.name}
-        </a>
-      `;
-    }
-
-    function toggleChat() {
-      const panel = document.getElementById("vistaChat");
-      panel.style.display = panel.style.display === "flex" ? "none" : "flex";
-    }
-
-    function sendChat() {
-      const input = document.getElementById("vistaChatInput");
-      const messages = document.getElementById("vistaChatMessages");
-      if (!input.value.trim()) return;
-      messages.innerHTML += `<div><strong>You:</strong> ${input.value}</div>`;
-      input.value = "";
-    }
-  </script>
-
-  <!-- CHAT WIDGET -->
-  <div class="vista-chat-toggle" onclick="toggleChat()">💬</div>
-
-  <div class="vista-chat-panel" id="vistaChat">
-    <div class="vista-chat-header">
-      <strong>Vista AI Assistant</strong>
-      <button class="vista-chat-close" onclick="toggleChat()">✕</button>
+  <!-- CHATBOX -->
+  <div id="chatContainer">
+    <div id="chatHeader">
+      AI Concierge
+      <button id="closeChat">✖</button>
     </div>
-
-    <div class="vista-chat-messages" id="vistaChatMessages">
-      <div><strong>AI:</strong> Hello! How can I assist you today?</div>
-    </div>
-
-    <div class="vista-chat-input-row">
-      <input id="vistaChatInput" placeholder="Type your message...">
-      <button onclick="sendChat()">Send</button>
+    <div id="chatMessages"></div>
+    <div style="display:flex; padding-bottom:10px;">
+      <input id="chatInput" placeholder="Ask a question..." />
+      <button id="sendChat">➤</button>
     </div>
   </div>
+
+<script>
+/* Show Continue Guest Button */
+const currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
+if (currentGuest) {
+  document.getElementById("continueGuestContainer").innerHTML = `
+    <a href="guest_dashboard.html" class="portal-btn">
+      Continue as ${currentGuest.name}
+    </a>
+  `;
+}
+
+/* CHATBOX BEHAVIOR */
+const chatBtn = document.getElementById("chatButton");
+const chatBox = document.getElementById("chatContainer");
+const closeChat = document.getElementById("closeChat");
+const sendBtn = document.getElementById("sendChat");
+const chatInput = document.getElementById("chatInput");
+const chatMessages = document.getElementById("chatMessages");
+
+chatBtn.onclick = () => chatBox.style.display = "block";
+closeChat.onclick = () => chatBox.style.display = "none";
+
+/* AI ENGINE */
+function hotelAIResponse(message) {
+  const msg = message.toLowerCase();
+
+  if (msg.includes("wifi")) return "Wi-Fi: <strong>GrandVista_Guest</strong><br>Password: <strong>StayGolden2025</strong>";
+  if (msg.includes("check out")) return "Check-out time is 11:00 AM.";
+  if (msg.includes("check in")) return "Check-in time begins at 3:00 PM.";
+  if (msg.includes("towel") || msg.includes("toiletries")) return "Housekeeping has been notified!";
+  if (msg.includes("spa")) return "The spa is open from 9 AM to 8 PM.";
+  if (msg.includes("food") || msg.includes("room service")) return "Room service is available 6:30 AM – 11:30 PM.";
+
+  return "I'm here to assist you! Could you please tell me more?";
+}
+
+/* Chat Send */
+sendBtn.onclick = () => {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+
+  chatMessages.innerHTML += `<div class="chat user">${msg}</div>`;
+  chatInput.value = "";
+
+  setTimeout(() => {
+    chatMessages.innerHTML += `<div class="chat ai">${hotelAIResponse(msg)}</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 300);
+};
+</script>
 
 </body>
 </html>
