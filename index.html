@@ -51,112 +51,95 @@
       margin-top: 1.5rem;
     }
 
-    h2 {
-      margin-bottom: 1.2rem;
-      color: #333;
-    }
-
     /* CHATBOX */
     #chatButton {
       position: fixed;
-      bottom: 25px;
-      right: 25px;
+      bottom: 22px;
+      right: 22px;
       background: #d4af37;
       color: white;
       border: none;
-      border-radius: 50%;
-      width: 65px;
-      height: 65px;
+      padding: 14px 22px;
+      border-radius: 30px;
+      font-size: 1rem;
       cursor: pointer;
-      font-size: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
 
     #chatContainer {
-      display: none;
       position: fixed;
-      bottom: 100px;
-      right: 25px;
-      width: 320px;
+      bottom: 90px;
+      right: 22px;
+      width: 300px;
       background: white;
-      border-radius: 12px;
       border: 2px solid #d4af37;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      border-radius: 12px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.2);
     }
 
     #chatHeader {
       background: #d4af37;
       color: white;
       padding: 10px;
-      border-radius: 10px 10px 0 0;
-      font-weight: bold;
+      font-size: 1.1rem;
       display: flex;
       justify-content: space-between;
-      align-items: center;
     }
 
     #closeChat {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 18px;
       cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
     }
 
     #chatMessages {
-      height: 260px;
+      height: 240px;
       overflow-y: auto;
       padding: 10px;
-      font-size: 0.9rem;
+      text-align: left;
     }
 
     .chat {
+      padding: 8px;
+      border-radius: 8px;
       margin: 6px 0;
-      padding: 8px 10px;
-      border-radius: 6px;
       max-width: 85%;
     }
+    .chat.user { background: #f1e6c9; margin-left: auto; }
+    .chat.ai { background: #fff8e5; border-left: 3px solid #d4af37; }
 
-    .chat.user {
-      background: #e8d7a9;
-      margin-left: auto;
-    }
-
-    .chat.ai {
-      background: #fff3cd;
-      margin-right: auto;
-    }
-
-    #chatInput {
-      width: 85%;
+    #chatInputBox {
       padding: 10px;
-      border: 1px solid #d4af37;
-      border-radius: 8px;
-      margin: 8px;
+      display: flex;
+      gap: 6px;
     }
-
-    #sendChat {
-      width: 50px;
+    #chatInput {
+      flex: 1;
       padding: 8px;
-      background: #d4af37;
       border-radius: 8px;
-      color: white;
-      cursor: pointer;
+      border: 1px solid #d4af37;
+    }
+    #sendChat {
+      padding: 8px 14px;
+      background: #d4af37;
       border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- HEADER -->
   <header class="gv-header">
     <img src="V(1).png" alt="Grand Vista Hotel Logo" class="gv-logo">
     <h1>Grand Vista Hotel</h1>
     <p>Your Digital Check-In Experience</p>
   </header>
 
-  <!-- GUEST SECTION -->
   <div class="section-box">
     <h2>Guest Access</h2>
 
@@ -165,13 +148,11 @@
     <div id="continueGuestContainer"></div>
   </div>
 
-  <!-- EMPLOYEE SECTION -->
   <div class="section-box">
     <h2>Employee Portal</h2>
     <a href="employee_login.html" class="portal-btn">Employee Login</a>
   </div>
 
-  <!-- PROJECT TEAM SECTION -->
   <div class="section-box">
     <h2>Project Team Access</h2>
     <a href="team_login.html" class="portal-btn">Project Team Login</a>
@@ -181,34 +162,40 @@
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
 
-  <!-- CHATBUTTON -->
-  <button id="chatButton">💬</button>
+  <!-- CHAT BUTTON -->
+  <button id="chatButton">Concierge</button>
 
   <!-- CHATBOX -->
   <div id="chatContainer">
     <div id="chatHeader">
-      AI Concierge
-      <button id="closeChat">✖</button>
+      Concierge AI
+      <span id="closeChat">✕</span>
     </div>
+
     <div id="chatMessages"></div>
-    <div style="display:flex; padding-bottom:10px;">
-      <input id="chatInput" placeholder="Ask a question..." />
-      <button id="sendChat">➤</button>
+
+    <div id="chatInputBox">
+      <input id="chatInput" placeholder="Ask me anything..." />
+      <button id="sendChat">Send</button>
     </div>
   </div>
 
 <script>
-/* Show Continue Guest Button */
-const currentGuest = JSON.parse(localStorage.getItem("currentGuest"));
-if (currentGuest) {
-  document.getElementById("continueGuestContainer").innerHTML = `
-    <a href="guest_dashboard.html" class="portal-btn">
-      Continue as ${currentGuest.name}
-    </a>
-  `;
+// ---------- Load current guest ----------
+function getGuest() {
+  return JSON.parse(localStorage.getItem("currentGuest")) || null;
 }
 
-/* CHATBOX BEHAVIOR */
+// Show continue button
+const g = getGuest();
+if (g) {
+  document.getElementById("continueGuestContainer").innerHTML =
+    `<a href="guest_dashboard.html" class="portal-btn">Continue as ${g.name}</a>`;
+}
+
+// -----------------------------------------------------
+// SMART CHATBOX WITH GREETING + AI RESPONSES
+// -----------------------------------------------------
 const chatBtn = document.getElementById("chatButton");
 const chatBox = document.getElementById("chatContainer");
 const closeChat = document.getElementById("closeChat");
@@ -216,24 +203,48 @@ const sendBtn = document.getElementById("sendChat");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-chatBtn.onclick = () => chatBox.style.display = "block";
+let memory = [];
+
+chatBtn.onclick = () => {
+  chatBox.style.display = "flex";
+  chatMessages.innerHTML = "";
+
+  const guest = getGuest();
+  const name = guest ? guest.name.split(" ")[0] : "Guest";
+
+  chatMessages.innerHTML += `
+    <div class="chat ai">
+      Hello ${name}! 👋<br>
+      Welcome to the Grand Vista Concierge.<br>
+      How may I assist you today?
+    </div>`;
+};
+
 closeChat.onclick = () => chatBox.style.display = "none";
 
-/* AI ENGINE */
-function hotelAIResponse(message) {
-  const msg = message.toLowerCase();
+// AI Response System
+function aiReply(input) {
+  const txt = input.toLowerCase();
+  const guest = getGuest();
 
-  if (msg.includes("wifi")) return "Wi-Fi: <strong>GrandVista_Guest</strong><br>Password: <strong>StayGolden2025</strong>";
-  if (msg.includes("check out")) return "Check-out time is 11:00 AM.";
-  if (msg.includes("check in")) return "Check-in time begins at 3:00 PM.";
-  if (msg.includes("towel") || msg.includes("toiletries")) return "Housekeeping has been notified!";
-  if (msg.includes("spa")) return "The spa is open from 9 AM to 8 PM.";
-  if (msg.includes("food") || msg.includes("room service")) return "Room service is available 6:30 AM – 11:30 PM.";
+  if (txt.includes("wifi")) return "Wi-Fi: GrandVista_Guest<br>Password: StayGolden2025";
+  if (txt.includes("spa")) return "Our spa is open 9 AM – 8 PM daily.";
+  if (txt.includes("food") || txt.includes("restaurant"))
+    return "The restaurant is open 7 AM – 10 PM. Room service available until 11:30 PM.";
+  if (txt.includes("towel")) return "I can request housekeeping to deliver fresh towels to your room.";
 
-  return "I'm here to assist you! Could you please tell me more?";
+  if (guest) {
+    if (txt.includes("room")) return `You are staying in room ${guest.room}.`;
+    if (txt.includes("name")) return `You are ${guest.name}.`;
+  }
+
+  memory.push(input);
+  if (memory.length > 5) memory.shift();
+
+  return "I'm here to help! Could you clarify your request?";
 }
 
-/* Chat Send */
+// Send message
 sendBtn.onclick = () => {
   const msg = chatInput.value.trim();
   if (!msg) return;
@@ -242,9 +253,9 @@ sendBtn.onclick = () => {
   chatInput.value = "";
 
   setTimeout(() => {
-    chatMessages.innerHTML += `<div class="chat ai">${hotelAIResponse(msg)}</div>`;
+    chatMessages.innerHTML += `<div class="chat ai">${aiReply(msg)}</div>`;
     chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, 300);
+  }, 250);
 };
 </script>
 
