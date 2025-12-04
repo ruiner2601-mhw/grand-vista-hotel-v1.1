@@ -38,17 +38,8 @@
       color: #634e22;
     }
 
-    .info-line {
-      margin: 0.3rem 0;
-      font-size: 1.05rem;
-      color: #333;
-    }
-
-    .info-sub {
-      font-size: 0.95rem;
-      color: #555;
-      margin: 2px 0;
-    }
+    .info-line { margin: 0.3rem 0; font-size: 1.05rem; color: #333; }
+    .info-sub { font-size: 0.95rem; color:#555; margin: 2px 0; }
 
     .request-box {
       background: #fffdf5;
@@ -70,21 +61,6 @@
     .status-in-progress { background:#d1ecf1; border:1px solid #bee5eb; color:#0c5460; }
     .status-completed { background:#d4edda; border:1px solid #c3e6cb; color:#155724; }
 
-    .timestamp {
-      font-size: 0.85rem;
-      color: #666;
-      display: block;
-      margin-top: 4px;
-    }
-
-    .request-form {
-      padding: 1rem;
-      background: #fffdf7;
-      border: 1px solid #e8d7a9;
-      border-radius: 10px;
-      margin-bottom: 1.5rem;
-    }
-
     select, input, button {
       padding: 10px;
       font-size: 1rem;
@@ -94,16 +70,11 @@
       margin-top: 10px;
     }
 
-    button {
-      background: #d4af37;
-      color: white;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+    button { background:#d4af37; color:white; cursor:pointer; }
+    button:hover { background:#e5c864; }
 
-    button:hover { background: #e5c864; }
+    /* ---------------------- CHATBOX ---------------------- */
 
-    /* CHATBOX */
     #chatButton {
       position: fixed;
       bottom: 25px;
@@ -146,7 +117,7 @@
       background: none;
       border: none;
       color: white;
-      font-size: 18px;
+      font-size: 14px;
       cursor: pointer;
     }
 
@@ -164,81 +135,68 @@
       max-width: 85%;
     }
 
-    .chat.user {
-      background: #e8d7a9;
-      margin-left: auto;
-    }
-
-    .chat.ai {
-      background: #fff3cd;
-      margin-right: auto;
-    }
+    .chat.user { background: #e8d7a9; margin-left: auto; }
+    .chat.ai { background: #fff3cd; margin-right: auto; }
 
     #chatInput {
-      width: 85%;
-      padding: 10px;
-      border: 1px solid #d4af37;
-      border-radius: 8px;
-      margin: 8px;
+      width: 80%;
+      padding: 12px;
+      font-size: 0.95rem;
     }
 
     #sendChat {
-      width: 50px;
-      padding: 8px;
-      background: #d4af37;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      border: none;
+      width: 45px;
+      height: 45px;
+      font-size: 18px;
+      padding: 0;
+      margin-top: 6px;
     }
   </style>
 </head>
 
 <body>
 
-  <header class="gv-header">
-    <img src="V(1).png" alt="Logo" class="gv-logo">
-    <h1 id="guestNameHeader">Guest Dashboard</h1>
-  </header>
+<header class="gv-header">
+  <img src="V(1).png" alt="Logo" class="gv-logo">
+  <h1 id="guestNameHeader">Guest Dashboard</h1>
+</header>
 
-  <div class="dashboard-box" id="guestInfo"></div>
+<div class="dashboard-box" id="guestInfo"></div>
 
-  <footer>
-    <p>&copy; 2025 Grand Vista Hotel</p>
-  </footer>
+<footer>
+  <p>&copy; 2025 Grand Vista Hotel</p>
+</footer>
 
-  <!-- CHAT BUTTON -->
-  <button id="chatButton">💬</button>
+<!-- CHAT BUTTON -->
+<button id="chatButton">💬</button>
 
-  <!-- CHATBOX -->
-  <div id="chatContainer">
-    <div id="chatHeader">
-      AI Concierge
-      <button id="closeChat">✖</button>
-    </div>
-    <div id="chatMessages"></div>
-    <div style="display:flex; padding-bottom:10px;">
-      <input id="chatInput" placeholder="Ask a question..." />
-      <button id="sendChat">➤</button>
-    </div>
+<!-- CHATBOX -->
+<div id="chatContainer">
+  <div id="chatHeader">
+    AI Concierge
+    <button id="closeChat">✖</button>
   </div>
+  <div id="chatMessages"></div>
+
+  <div style="display:flex; padding-bottom:10px;">
+    <input id="chatInput" placeholder="Ask a question..." />
+    <button id="sendChat">➤</button>
+  </div>
+</div>
 
 <script>
-/* AUTO DELETE OLD REQUESTS */
+/* ---------------- AUTO DELETE OLD REQUESTS ---------------- */
 function autoDeleteOldRequests(guest) {
   const FIVE_MIN = 5 * 60 * 1000;
   const now = Date.now();
 
-  guest.requests = guest.requests.filter(req => {
-    if (req.status === "completed" && req.completedAt) {
-      return (now - req.completedAt) < FIVE_MIN;
-    }
-    return true;
-  });
-
+  guest.requests = guest.requests.filter(req =>
+    !(req.status === "completed" && req.completedAt && (now - req.completedAt) >= FIVE_MIN)
+  );
   return guest;
 }
 
+/* ---------------- LOAD DASHBOARD ---------------- */
 function loadGuestDashboard() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   if (!guest) {
@@ -265,14 +223,11 @@ function loadGuestDashboard() {
     ${guest.earlyCheckInRequested ? `<span class="badge">⏰ Early Check-In</span>` : ""}
   `;
 
-  const maskedKey = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
+  const keyMasked = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
 
-  const sortedRequests = (guest.requests || []).sort((a,b)=> b.createdAt - a.createdAt);
-
-  const requestsHTML =
-    sortedRequests.length === 0
-      ? `<p>No requests submitted yet.</p>`
-      : sortedRequests.map(r => `
+  const requests = (guest.requests || [])
+      .sort((a,b)=> b.createdAt - a.createdAt)
+      .map(r => `
         <div class="request-box">
           <strong>${r.text}</strong>
           <span class="request-status status-${r.status}">
@@ -280,38 +235,35 @@ function loadGuestDashboard() {
           </span>
           <span class="timestamp">${r.date}</span>
         </div>
-      `).join("");
+      `).join("") || `<p>No requests submitted yet.</p>`;
 
   document.getElementById("guestInfo").innerHTML = `
     <h2 class="section-title">Your Stay Information</h2>
-
     ${badges}
-
     <p class="info-line"><strong>Room Number:</strong> ${guest.room}</p>
     <p class="info-line"><strong>Guests in Room:</strong> ${guest.guestsInRoom}</p>
     <p class="info-line"><strong>Room Status:</strong> ${guest.roomStatus}</p>
-    <p class="info-line"><strong>Arrival Date:</strong> ${guest.arrivalDate}</p>
-    <p class="info-line"><strong>Departure Date:</strong> ${guest.departureDate}</p>
+    <p class="info-line"><strong>Arrival:</strong> ${guest.arrivalDate}</p>
+    <p class="info-line"><strong>Departure:</strong> ${guest.departureDate}</p>
     <p class="info-line"><strong>Notes:</strong> ${guest.notes}</p>
 
-    <h2 class="section-title">Your Digital Key</h2>
+    <h2 class="section-title">Digital Key</h2>
     <p>
-      <span id="keyValue">${maskedKey}</span>
+      <span id="keyValue">${keyMasked}</span>
       <button onclick="toggleKey()">Show</button>
     </p>
 
     <h2 class="section-title">Hotel Information</h2>
     <p class="info-sub"><strong>Wi-Fi:</strong> GrandVista_Guest</p>
     <p class="info-sub"><strong>Password:</strong> StayGolden2025</p>
-    <p class="info-sub"><strong>Check-In:</strong> 3:00 PM</p>
-    <p class="info-sub"><strong>Check-Out:</strong> 11:00 AM</p>
+    <p class="info-sub"><strong>Check-In:</strong> 3 PM</p>
+    <p class="info-sub"><strong>Check-Out:</strong> 11 AM</p>
     <p class="info-sub"><strong>Housekeeping:</strong> 8 AM – 6 PM</p>
     <p class="info-sub"><strong>Room Service:</strong> 6:30 AM – 11:30 PM</p>
     <p class="info-sub"><strong>Spa:</strong> 9 AM – 8 PM</p>
     <p class="info-sub"><strong>Restaurant:</strong> 7 AM – 10 PM</p>
 
-    <h2 class="section-title">Create a New Service Request</h2>
-
+    <h2 class="section-title">New Service Request</h2>
     <div class="request-form">
       <select id="requestType">
         <option value="">Select a Request</option>
@@ -325,35 +277,42 @@ function loadGuestDashboard() {
       </select>
 
       <input id="otherRequest" style="display:none;" placeholder="Describe your request...">
-
       <button onclick="submitRequest()">Submit Request</button>
     </div>
 
     <h2 class="section-title">Your Service Requests</h2>
-    ${requestsHTML}
+    ${requests}
   `;
 }
 
 /* Toggle key visibility */
 function toggleKey() {
-  let guest = JSON.parse(localStorage.getItem("currentGuest"));
+  const guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
-  const current = keySpan.textContent;
-  keySpan.textContent = current.startsWith("****") ? guest.key : "****" + guest.key.slice(-4);
+  keySpan.textContent =
+    keySpan.textContent.startsWith("****") ? guest.key : "****" + guest.key.slice(-4);
 }
 
-/* Submit request */
+/* Handle "Other" field */
+document.addEventListener("change", e => {
+  if (e.target.id === "requestType") {
+    document.getElementById("otherRequest").style.display =
+      e.target.value === "Other" ? "block" : "none";
+  }
+});
+
+/* Submit new request */
 function submitRequest() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   let type = document.getElementById("requestType").value;
-  let other = document.getElementById("otherRequest");
 
   if (!type) return alert("Please select a request type.");
 
-  if (type === "Other" && !other.value.trim())
-    return alert("Please describe your request.");
-
-  if (type === "Other") type = other.value.trim();
+  if (type === "Other") {
+    const other = document.getElementById("otherRequest").value.trim();
+    if (!other) return alert("Please describe your request.");
+    type = other;
+  }
 
   guest.requests.push({
     text: type,
@@ -375,15 +334,7 @@ function submitRequest() {
   location.reload();
 }
 
-/* Show/hide Other field */
-document.addEventListener("change", e => {
-  if (e.target.id === "requestType") {
-    document.getElementById("otherRequest").style.display =
-      e.target.value === "Other" ? "block" : "none";
-  }
-});
-
-/* CHATBOX LOGIC */
+/* ---------------- CHATBOX ---------------- */
 const chatBtn = document.getElementById("chatButton");
 const chatBox = document.getElementById("chatContainer");
 const closeChat = document.getElementById("closeChat");
@@ -391,7 +342,19 @@ const sendBtn = document.getElementById("sendChat");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-chatBtn.onclick = () => chatBox.style.display = "block";
+chatBtn.onclick = () => {
+  chatBox.style.display = "block";
+
+  // Personalized greeting (Option C)
+  const guest = JSON.parse(localStorage.getItem("currentGuest"));
+  if (chatMessages.innerHTML.trim() === "") {
+    chatMessages.innerHTML += `
+      <div class="chat ai">
+        Hello, <strong>${guest.name}</strong>! 👋 How can I assist you during your stay today?
+      </div>`;
+  }
+};
+
 closeChat.onclick = () => chatBox.style.display = "none";
 
 function hotelAIResponse(message) {
@@ -401,7 +364,8 @@ function hotelAIResponse(message) {
   if (msg.includes("check out")) return "Check-out time is 11:00 AM.";
   if (msg.includes("check in")) return "Check-in begins at 3:00 PM.";
   if (msg.includes("spa")) return "The spa is open from 9 AM – 8 PM.";
-  if (msg.includes("food") || msg.includes("room service")) return "Room service runs 6:30 AM – 11:30 PM.";
+  if (msg.includes("room service") || msg.includes("food"))
+    return "Room service runs 6:30 AM – 11:30 PM.";
   if (msg.includes("towel") || msg.includes("pillow"))
     return "Housekeeping has been notified. Someone will arrive shortly.";
 
