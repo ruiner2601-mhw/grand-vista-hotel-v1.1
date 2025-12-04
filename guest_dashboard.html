@@ -101,82 +101,139 @@
       cursor: pointer;
       transition: 0.2s;
     }
+
     button:hover { background: #e5c864; }
 
-    /* Smaller logo */
-    .gv-logo {
-      height: 100px !important;
-    }
-
-    /* Chatbot styles */
-    #vistaChatBtn {
+    /* =========================
+       VISTA AI CHAT WIDGET
+       ========================= */
+    .vista-chat-toggle {
       position: fixed;
-      bottom: 22px;
-      right: 22px;
-      background: #d4af37;
-      color: white;
-      border: none;
-      padding: 14px 18px;
-      border-radius: 50%;
-      font-size: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      z-index: 9999;
-    }
-
-    #vistaChatWindow {
-      position: fixed;
-      bottom: 90px;
       right: 20px;
+      bottom: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #d4af37;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      z-index: 9998;
+    }
+
+    .vista-chat-panel {
+      position: fixed;
+      right: 20px;
+      bottom: 90px;
       width: 320px;
-      height: 430px;
-      background: white;
+      max-height: 430px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
       border: 2px solid #d4af37;
-      border-radius: 10px;
       display: none;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
       z-index: 9999;
+      font-size: 0.9rem;
+      text-align: left;
     }
 
-    #vistaChatHeader {
-      background: #d4af37;
-      color: white;
-      padding: 12px;
-      font-size: 1.1rem;
+    .vista-chat-header {
+      background: #faf3dc;
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid #e5d5aa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .vista-chat-header-title {
       font-weight: bold;
-      text-align: center;
+      color: #7a5a16;
+      font-size: 0.95rem;
     }
 
-    #vistaChatMessages {
-      flex-grow: 1;
-      padding: 10px;
+    .vista-chat-header-sub {
+      font-size: 0.8rem;
+      color: #8c7540;
+    }
+
+    .vista-chat-close {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #7a5a16;
+    }
+
+    .vista-chat-messages {
+      flex: 1;
+      padding: 0.7rem;
       overflow-y: auto;
+      background: #fffbf1;
+    }
+
+    .vista-msg {
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+
+    .vista-msg-user {
+      text-align: right;
+    }
+
+    .vista-msg-user span {
+      display: inline-block;
+      background: #d4af37;
+      color: #fff;
+      padding: 0.35rem 0.7rem;
+      border-radius: 10px 10px 0 10px;
+      max-width: 90%;
+    }
+
+    .vista-msg-ai span {
+      display: inline-block;
+      background: #ffffff;
+      border: 1px solid #e5d5aa;
+      color: #4a3b1c;
+      padding: 0.35rem 0.7rem;
+      border-radius: 10px 10px 10px 0;
+      max-width: 95%;
+    }
+
+    .vista-chat-input-row {
+      display: flex;
+      border-top: 1px solid #e5d5aa;
+      background: #fdf7e7;
+      padding: 0.4rem;
+    }
+
+    .vista-chat-input-row input {
+      flex: 1;
+      padding: 0.35rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #d4af37;
       font-size: 0.9rem;
     }
 
-    #vistaChatInputBox {
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      display: flex;
-      gap: 5px;
-    }
-
-    #vistaChatInput {
-      flex-grow: 1;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    #vistaChatSend {
-      padding: 8px 12px;
-      background: #d4af37;
+    .vista-chat-input-row button {
+      margin-left: 0.4rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 8px;
       border: none;
-      color: white;
-      border-radius: 6px;
+      background: #d4af37;
+      color: #fff;
       cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .vista-chat-input-row button:hover {
+      background: #e6c864;
     }
   </style>
 </head>
@@ -193,81 +250,32 @@
     <p>&copy; 2025 Grand Vista Hotel</p>
   </footer>
 
-<!-- ==========================================================
-     CHATBOT WIDGET
-========================================================== -->
-<button id="vistaChatBtn" onclick="toggleVistaChat()">💬</button>
+  <!-- VISTA AI WIDGET -->
+  <div class="vista-chat-toggle" id="vistaToggle">💬</div>
 
-<div id="vistaChatWindow">
-  <div id="vistaChatHeader">Vista AI Assistant</div>
-
-  <div id="vistaChatMessages"></div>
-
-  <div id="vistaChatInputBox">
-    <input id="vistaChatInput" type="text" placeholder="Ask Vista..." />
-    <button id="vistaChatSend" onclick="sendVistaMessage()">Send</button>
+  <div class="vista-chat-panel" id="vistaPanel">
+    <div class="vista-chat-header">
+      <div>
+        <div class="vista-chat-header-title">Vista AI Concierge</div>
+        <div class="vista-chat-header-sub">Here to assist with your stay</div>
+      </div>
+      <button class="vista-chat-close" id="vistaClose">&times;</button>
+    </div>
+    <div class="vista-chat-messages" id="vistaMessages"></div>
+    <div class="vista-chat-input-row">
+      <input
+        id="vistaInput"
+        type="text"
+        placeholder="Ask about your room, Wi-Fi, or services..."
+      />
+      <button id="vistaSend">Send</button>
+    </div>
   </div>
-</div>
 
 <script>
-function toggleVistaChat() {
-  const box = document.getElementById("vistaChatWindow");
-  box.style.display = box.style.display === "flex" ? "none" : "flex";
-}
-
-function sendVistaMessage() {
-  const input = document.getElementById("vistaChatInput");
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  addChatMessage("guest", msg);
-  input.value = "";
-
-  handleVistaAI(msg);
-}
-
-function addChatMessage(sender, text) {
-  const box = document.getElementById("vistaChatMessages");
-  const div = document.createElement("div");
-  div.style.margin = "6px 0";
-
-  div.innerHTML =
-    sender === "guest"
-      ? `<div style="text-align:right;"><strong>You:</strong> ${text}</div>`
-      : `<div><strong>Vista:</strong> ${text}</div>`;
-
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-/* AI BEHAVIOR */
-function handleVistaAI(message) {
-  let guest = JSON.parse(localStorage.getItem("currentGuest"));
-
-  // Simple examples (can add MUCH more)
-  if (/wifi|internet/i.test(message)) {
-    addChatMessage("ai", "Our Wi-Fi network is <strong>GrandVista_Guest</strong> and the password is <strong>StayGolden2025</strong>.");
-    return;
-  }
-
-  if (/key|digital/i.test(message)) {
-    addChatMessage("ai", `Your digital key is: <strong>${guest.key}</strong>.`);
-    return;
-  }
-
-  if (/request|towel|pillows|blanket/i.test(message)) {
-    addChatMessage("ai", "To create a new service request, scroll to the 'New Service Request' section of this page!");
-    return;
-  }
-
-  addChatMessage("ai", "I'm here to help! You can ask about Wi-Fi, digital keys, room requests, hotel services, and more.");
-}
-</script>
-
-<!-- ==========================================================
-     ORIGINAL GUEST DASHBOARD LOGIC
-========================================================== -->
-<script>
+/* ---------------------------------------------------------
+   AUTO DELETE COMPLETED REQUESTS > 5 MINUTES OLD
+--------------------------------------------------------- */
 function autoDeleteOldRequests(guest) {
   const FIVE_MIN = 5 * 60 * 1000;
   const now = Date.now();
@@ -282,6 +290,9 @@ function autoDeleteOldRequests(guest) {
   return guest;
 }
 
+/* ---------------------------------------------------------
+   LOAD DASHBOARD
+--------------------------------------------------------- */
 function loadGuestDashboard() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   if (!guest) {
@@ -290,9 +301,11 @@ function loadGuestDashboard() {
     return;
   }
 
+  // Auto cleanup
   guest = autoDeleteOldRequests(guest);
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
+  // Save cleanup to global list
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
   const idx = allGuests.findIndex(g => g.name === guest.name && g.passcode === guest.passcode);
   if (idx !== -1) {
@@ -300,16 +313,20 @@ function loadGuestDashboard() {
     localStorage.setItem("guests", JSON.stringify(allGuests));
   }
 
+  // Greeting
   document.getElementById("guestNameHeader").textContent = `Welcome, ${guest.name}!`;
 
+  // Badges
   const badges = `
     ${guest.vip ? `<span class="badge">⭐ VIP</span>` : ""}
     ${guest.hasPet ? `<span class="badge">🐾 Pet in Room</span>` : ""}
     ${guest.earlyCheckInRequested ? `<span class="badge">⏰ Early Check-In</span>` : ""}
   `;
 
+  // Mask key
   const maskedKey = guest.key ? "****" + guest.key.slice(-4) : "Not Assigned";
 
+  // Request history
   const sortedRequests = (guest.requests || [])
     .sort((a, b) => b.createdAt - a.createdAt);
 
@@ -317,13 +334,18 @@ function loadGuestDashboard() {
     sortedRequests.length === 0
       ? `<p>No requests submitted yet.</p>`
       : sortedRequests.map(r => `
-        <div class="request-box">
-          <strong>${r.text}</strong>
-          <span class="request-status status-${r.status}">${r.status}</span>
-          <span class="timestamp">${r.date}</span>
-        </div>
-      `).join("");
+          <div class="request-box">
+            <strong>${r.text}</strong>
+            <span class="request-status status-${r.status}">
+              ${r.status.replace("-", " ")}
+            </span>
+            <span class="timestamp">${r.date}</span>
+          </div>
+        `).join("");
 
+  /* ---------------------------------------------------------
+      FULL PAGE HTML OUTPUT
+  --------------------------------------------------------- */
   document.getElementById("guestInfo").innerHTML = `
     <h2 class="section-title">Your Stay Information</h2>
 
@@ -343,13 +365,14 @@ function loadGuestDashboard() {
     </p>
 
     <h2 class="section-title">Hotel Information</h2>
-    <p class="info-sub"><strong>Wi-Fi:</strong> GrandVista_Guest / StayGolden2025</p>
-    <p class="info-sub"><strong>Check-In:</strong> 3:00 PM</p>
-    <p class="info-sub"><strong>Check-Out:</strong> 11:00 AM</p>
-    <p class="info-sub"><strong>Housekeeping:</strong> 8 AM – 6 PM</p>
+    <p class="info-sub"><strong>Wi-Fi Network:</strong> GrandVista_Guest</p>
+    <p class="info-sub"><strong>Wi-Fi Password:</strong> StayGolden2025</p>
+    <p class="info-sub"><strong>Check-In Time:</strong> 3:00 PM</p>
+    <p class="info-sub"><strong>Check-Out Time:</strong> 11:00 AM</p>
+    <p class="info-sub"><strong>Housekeeping:</strong> 8:00 AM – 6:00 PM</p>
     <p class="info-sub"><strong>Room Service:</strong> 6:30 AM – 11:30 PM</p>
-    <p class="info-sub"><strong>Spa:</strong> 9 AM – 8 PM</p>
-    <p class="info-sub"><strong>Restaurant:</strong> 7 AM – 10 PM</p>
+    <p class="info-sub"><strong>Spa:</strong> 9:00 AM – 8:00 PM</p>
+    <p class="info-sub"><strong>Restaurant:</strong> 7:00 AM – 10:00 PM</p>
 
     <h2 class="section-title">Create a New Service Request</h2>
 
@@ -379,7 +402,6 @@ function toggleKey() {
   let guest = JSON.parse(localStorage.getItem("currentGuest"));
   const keySpan = document.getElementById("keyValue");
   const current = keySpan.textContent;
-
   keySpan.textContent = current.startsWith("****")
     ? guest.key
     : "****" + guest.key.slice(-4);
@@ -413,6 +435,7 @@ function submitRequest() {
 
   guest.requests.push(newReq);
 
+  // Save
   localStorage.setItem("currentGuest", JSON.stringify(guest));
 
   let allGuests = JSON.parse(localStorage.getItem("guests")) || [];
@@ -429,6 +452,114 @@ document.addEventListener("change", function(e) {
   if (e.target.id === "requestType") {
     document.getElementById("otherRequest").style.display =
       e.target.value === "Other" ? "block" : "none";
+  }
+});
+
+/* ============================
+   VISTA AI – GUEST DASHBOARD
+============================ */
+const PAGE_CONTEXT = "guest-dashboard";
+
+const toggleEl = document.getElementById("vistaToggle");
+const panelEl = document.getElementById("vistaPanel");
+const closeEl = document.getElementById("vistaClose");
+const msgEl = document.getElementById("vistaMessages");
+const inputEl = document.getElementById("vistaInput");
+const sendEl = document.getElementById("vistaSend");
+
+function addVistaMessage(sender, text) {
+  const div = document.createElement("div");
+  div.classList.add("vista-msg");
+  if (sender === "user") {
+    div.classList.add("vista-msg-user");
+  } else {
+    div.classList.add("vista-msg-ai");
+  }
+  div.innerHTML = `<span>${text}</span>`;
+  msgEl.appendChild(div);
+  msgEl.scrollTop = msgEl.scrollHeight;
+}
+
+function luxuryGreetingGuest() {
+  const guest = JSON.parse(localStorage.getItem("currentGuest"));
+  const namePart = guest ? `, ${guest.name}` : "";
+  addVistaMessage(
+    "ai",
+    `Welcome${namePart}. I am Vista AI, your digital concierge. I can help with room details, Wi-Fi, service requests, and hotel amenities. How may I assist you?`
+  );
+}
+
+function handleVistaQuestionGuest(text) {
+  const guest = JSON.parse(localStorage.getItem("currentGuest"));
+  const lower = text.toLowerCase();
+
+  if (lower.includes("wifi") || lower.includes("wi-fi")) {
+    return "During this training scenario, the Wi-Fi network is <strong>GrandVista_Guest</strong> and the password is <strong>StayGolden2025</strong>.";
+  }
+
+  if (lower.includes("room number") || lower.includes("my room")) {
+    if (guest && guest.room) {
+      return `You are currently assigned to <strong>Room ${guest.room}</strong>.`;
+    }
+    return "Your room number should appear at the top of your Guest Dashboard under “Room Number.”";
+  }
+
+  if (lower.includes("key") || lower.includes("digital key")) {
+    if (guest && guest.key) {
+      return "Your digital key is shown in the “Your Digital Key” section. You may use the Show/Hide button to reveal or mask it during the training.";
+    }
+    return "In this training scenario, your key is generated when you check in. If you do not see one, ask an employee to confirm your check-in status.";
+  }
+
+  if (lower.includes("room service") || lower.includes("service request") || lower.includes("request")) {
+    return "To place a request, scroll down to the <strong>“Create a New Service Request”</strong> section, select a request from the dropdown, or choose “Other” and describe your need. It will then appear in your request history and on the employee Room Service board.";
+  }
+
+  if (lower.includes("hours") || lower.includes("spa") || lower.includes("restaurant")) {
+    return "For this scenario, typical hours are: Check-In at <strong>3:00 PM</strong>, Check-Out at <strong>11:00 AM</strong>, Room Service from <strong>6:30 AM – 11:30 PM</strong>, Spa from <strong>9:00 AM – 8:00 PM</strong>, and Restaurant from <strong>7:00 AM – 10:00 PM</strong>.";
+  }
+
+  if (lower.includes("check-out") || lower.includes("checkout") || lower.includes("check out")) {
+    return "Check-Out time is <strong>11:00 AM</strong>. In this training environment, status changes are handled by employees using the Guest Management Board.";
+  }
+
+  if (lower.includes("what can you do") || lower.includes("help")) {
+    return "Here in your Guest Dashboard, I can clarify your room and stay details, explain your service request history, guide you to the request form, and remind you of hotel information like Wi-Fi and hours.";
+  }
+
+  return "Thank you for your question. From this dashboard I can help you understand your stay details, your digital key, room service requests, and general information about hotel amenities and hours.";
+}
+
+function handleSendVista() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  addVistaMessage("user", text);
+  inputEl.value = "";
+
+  let reply = handleVistaQuestionGuest(text);
+  addVistaMessage("ai", reply);
+}
+
+toggleEl.addEventListener("click", () => {
+  const isOpen = panelEl.style.display === "flex";
+  if (!isOpen) {
+    panelEl.style.display = "flex";
+    msgEl.innerHTML = "";
+    luxuryGreetingGuest();
+  } else {
+    panelEl.style.display = "none";
+  }
+});
+
+closeEl.addEventListener("click", () => {
+  panelEl.style.display = "none";
+});
+
+sendEl.addEventListener("click", handleSendVista);
+inputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleSendVista();
   }
 });
 
