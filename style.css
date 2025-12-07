@@ -209,3 +209,11 @@ footer {
   color: #666;
   font-size: 0.9rem;
 }
+
+/* UNIVERSAL LOGO SIZE */
+.gv-logo {
+  height: 100px;
+  width: auto;
+  display: block;
+  margin: 0 auto 1rem auto; /* centers and adds spacing */
+}
